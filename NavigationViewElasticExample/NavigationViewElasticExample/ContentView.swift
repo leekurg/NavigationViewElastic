@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationViewElastic(
-            title: "Products",
+            title: "Products lalala",
             blurStyle: .systemChromeMaterial,
             content:
                 LazyVStack {
@@ -88,8 +88,30 @@ struct ContentView: View {
     }
 }
 
+struct SystemNavBar: View {
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                LazyVStack {
+                    ForEach(1...100, id: \.self) { value in
+                        SampleCard(title: "\(value)")
+                            .paddingWhen(.top, 10) { value == 1 }
+                    }
+                }
+                .padding(.horizontal, 10)
+            }
+            .navigationTitle("Title")
+            .refreshable {
+                try? await Task.sleep(nanoseconds: 3 * 1_000_000_000)
+            }
+        }
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+
+        SystemNavBar().previewDisplayName("System")
     }
 }
