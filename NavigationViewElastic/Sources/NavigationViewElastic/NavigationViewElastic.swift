@@ -42,9 +42,7 @@ public struct NavigationViewElastic: View {
     private let largeTitleAdditionalTopPadding: CGFloat = 20
     private let navigationViewLargeTitleTopPadding: CGFloat = 40
     private let navigationViewLargeTitleBottomPadding: CGFloat = 10
-//    private let progressTriggeringOffset: CGFloat = getProgressOffsetForScreenSize(targetOffset: 30)
-//    private let progressViewTargetHeight: CGFloat = getProgressHeightForScreenSize(targetHeight: 60)
-    private let progressTriggeringOffset: CGFloat = 30
+    private let progressTriggeringOffset: CGFloat = 0
     private let progressViewTargetHeight: CGFloat = 60
 
     @State private var navigationViewSize: CGSize = .zero
@@ -100,7 +98,9 @@ private extension NavigationViewElastic {
         }
         .frame(maxWidth: .infinity)
         .frame(height: progressPanelHeight)
-        .opacity(progressOpacity)
+        .opacity(progressAppearFactor)
+        .rotationEffect(.degrees(progressAppearFactor * 180))
+        .scaleEffect(progressAppearFactor)
     }
 
     var navigationView: some View {
@@ -123,7 +123,7 @@ private extension NavigationViewElastic {
                     .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .opacity(largeTitleOpacity)
-                    .padding(   // TODO: move paddings set to private let
+                    .padding(
                         .init(
                             top: navigationViewLargeTitleTopPadding,
                             leading: 20,
@@ -228,11 +228,10 @@ private extension NavigationViewElastic {
         }
     }
 
-    var progressOpacity: Double {
-        let triggeringOffset = progressTriggeringOffset + 30
+    var progressAppearFactor: Double {
+        let triggeringOffset = progressTriggeringOffset
 
-        guard !isRefreshing else { return progressViewTargetHeight }
-        guard scrollOffset.isScrolledDown(triggeringOffset) else { return 0 }
+        guard !isRefreshing else { return 1 }
 
         var offset: Double = -clamp(
             scrollOffset.y,
@@ -252,24 +251,10 @@ private extension NavigationViewElastic {
         var offset: Double = -clamp(
             scrollOffset.y,
             min: -(progressTriggeringOffset + progressViewTargetHeight),
-            max: -(progressTriggeringOffset + 1)
+            max: -(progressTriggeringOffset )
         )
         offset -= progressTriggeringOffset
 
         return offset
-    }
-
-    static func getProgressOffsetForScreenSize(
-        targetOffset: CGFloat,
-        targetScreenHeight: CGFloat = 800
-    ) -> CGFloat {
-        targetOffset * UIScreen.height / targetScreenHeight
-    }
-
-    static func getProgressHeightForScreenSize(
-        targetHeight: CGFloat,
-        targetScreenHeight: CGFloat = 800
-    ) -> CGFloat {
-        targetHeight * UIScreen.height / targetScreenHeight
     }
 }

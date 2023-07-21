@@ -26,19 +26,19 @@ struct ContentView: View {
                 .eraseToAnyView()
             ,
             subtitleContent:
-//                HStack {
-//                    Button("Stop") {
-//                        stopRefreshing = true
-//                    }
-//
-//                    Button("Reset") {
-//                        stopRefreshing = false
-//                    }
-//
-//                    Text("value: \(stopRefreshing ? 1 : 0)")
-//                }
-//                .frame(height: 70)
-                filterFeed
+                HStack {
+                    Button("Stop") {
+                        stopRefreshing = true
+                    }
+
+                    Button("Reset") {
+                        stopRefreshing = false
+                    }
+
+                    Text("value: \(stopRefreshing ? 1 : 0)")
+                }
+                .frame(height: 70)
+//                filterFeed
                 .eraseToAnyView()
                 ,
             primaryActionLabel:
