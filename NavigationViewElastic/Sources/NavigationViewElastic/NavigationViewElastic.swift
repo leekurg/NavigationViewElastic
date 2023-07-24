@@ -41,8 +41,8 @@ public struct NavigationViewElastic: View {
     private let largeTitleSupposedHeight: CGFloat = 40
     private let largeTitleAdditionalTopPadding: CGFloat = 20
     private let navigationViewLargeTitleTopPadding: CGFloat = 40
-    private let navigationViewLargeTitleBottomPadding: CGFloat = 10
-    private let progressTriggeringOffset: CGFloat = 0
+    private let navigationViewLargeTitleBottomPadding: CGFloat = 5
+    private let progressTriggeringOffset: CGFloat = 20
     private let progressViewTargetHeight: CGFloat = 60
 
     @State private var navigationViewSize: CGSize = .zero
@@ -54,15 +54,12 @@ public struct NavigationViewElastic: View {
     public var body: some View {
         ZStack(alignment: .top) {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
-                VStack(spacing: 0) {
-                    progressView
-
-                    content
-                }
-                .animation(.easeInOut(duration: 0.3), value: progressPanelHeight)
-                .padding(.top, navigationViewSize.height + titleTopPaddingBlock)
+                content
+                    .padding(.top, navigationViewSize.height + titleTopPaddingBlock)
             }
             .onChange(of: scrollOffset) { offset in
+                guard onRefresh != nil else { return }
+
                 if scrollOffset.isScrolledDown(progressViewTargetHeight + progressTriggeringOffset) {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -72,16 +69,15 @@ public struct NavigationViewElastic: View {
             }
             .onChange(of: stopRefreshing.wrappedValue) { stop in
                 if stop {
-                    isRefreshing = false
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        isRefreshing = false
+                    }
                     print("Stop refresh received!!!")
                 }
             }
             .onChange(of: isRefreshing) { refreshing in
                 if refreshing { onRefresh?() }
             }
-//            .onChange(of: navigationViewLargeTitleSize) { value in
-//                print("title h: \(value.height)")
-//            }
 
             navigationView
         }
@@ -97,10 +93,10 @@ private extension NavigationViewElastic {
             $0.style = .large
         }
         .frame(maxWidth: .infinity)
-        .frame(height: progressPanelHeight)
         .opacity(progressAppearFactor)
+        .opacity(1 - smallTitleOpacity)
         .rotationEffect(.degrees(progressAppearFactor * 180))
-        .scaleEffect(progressAppearFactor)
+        .scaleEffect(clamp(progressAppearFactor - 0.2, min: 0.2))
     }
 
     var navigationView: some View {
@@ -108,6 +104,9 @@ private extension NavigationViewElastic {
             largeTitleLayer
 
             smallTitleLayer
+
+            progressView
+                .padding(.top, navigationViewLargeTitleTopPadding + 10)
         }
     }
 
@@ -145,7 +144,7 @@ private extension NavigationViewElastic {
 
     // MARK: - small title
     var smallTitleLayer: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             HStack { Text(title).lineLimit(1) }
                 .font(.system(size: 17, weight: .semibold))
                 .opacity(smallTitleOpacity)
@@ -159,12 +158,13 @@ private extension NavigationViewElastic {
             }
             .padding(.trailing, 10)
         }
-        .padding(.top, navigationViewLargeTitleTopPadding)
         .frame(maxWidth: .infinity)
+        .padding(.bottom, 7)
         .frame(
             height: navigationViewLargeTitleTopPadding +
             largeTitleSupposedHeight +
-            navigationViewLargeTitleBottomPadding
+            navigationViewLargeTitleBottomPadding,
+            alignment: .bottom
         )
         .background(smallTitleBackground)
     }
@@ -210,51 +210,31 @@ private extension NavigationViewElastic {
         // Padding to lower large title a bit to give it some upper space
         let heightToCover = largeTitleSupposedHeight + largeTitleAdditionalTopPadding
         if scrollOffset.isScrolledDown() {
-            var blockHeight = heightToCover + (-scrollOffset.y)
-
-            if onRefresh != nil {
-                blockHeight = clamp(blockHeight, max: heightToCover + 20)
-            }
-//            print("titleTopPaddingBlock: \(blockHeight)")
-            return blockHeight
+            var offset = -scrollOffset.y
+            offset = onRefresh != nil ? offset / 2 : offset
+            return heightToCover + offset
         } else {
             let offset = clamp(
                 scrollOffset.y, min: 0,
                 max: heightToCover * 2
             )
-            let blockHeight = clamp(heightToCover - offset / 2, min: 0)
-//            print("titleTopPaddingBlock: \(blockHeight))")
-            return blockHeight
+            return clamp(heightToCover - offset / 2, min: 0)
         }
     }
 
     var progressAppearFactor: Double {
-        let triggeringOffset = progressTriggeringOffset
-
+        guard onRefresh != nil else { return 0 }
         guard !isRefreshing else { return 1 }
+        guard scrollOffset.isScrolledDown() else { return 0 }
 
-        var offset: Double = -clamp(
-            scrollOffset.y,
-            min: -(triggeringOffset + progressViewTargetHeight),
-            max: -(triggeringOffset + 1)
+        var offset: Double = clamp(
+            -scrollOffset.y,
+            min: progressTriggeringOffset,
+            max: progressTriggeringOffset + progressViewTargetHeight
         )
-        offset -= triggeringOffset
+        offset -= progressTriggeringOffset
         let opacity = clamp(offset / progressViewTargetHeight, min: 0, max: 1)
 
         return opacity
-    }
-
-    var progressPanelHeight: CGFloat {
-        guard !isRefreshing else { return progressViewTargetHeight }
-        guard scrollOffset.isScrolledDown(progressTriggeringOffset) else { return 0 }
-
-        var offset: Double = -clamp(
-            scrollOffset.y,
-            min: -(progressTriggeringOffset + progressViewTargetHeight),
-            max: -(progressTriggeringOffset )
-        )
-        offset -= progressTriggeringOffset
-
-        return offset
     }
 }
