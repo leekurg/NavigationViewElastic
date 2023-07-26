@@ -5,11 +5,13 @@
 import SwiftUI
 import Foundation
 
-/// Custom navigation bar
-/// Was created to imitate system bar with ability to add custom content in the bottom of bar
-/// `content` and `subtitleContent` is not `() -> Content` that was made to prevent their content redrawing during scrolling
+/// Custom navigation bar.
+/// Was created to mimic system navigation bar with ability to add custom content in the bottom of bar.
+/// Also provide *onRefresh* method suitable for UDF-like using.
 ///
-/// NOTE: Suggest to use main content embeded in LazyStack
+/// *content*, *primaryActionLabel*  and *subtitleContent* is not *() -> Content* on purpose. That was made
+/// to prevent their content redrawing during scrolling.
+///
 public struct NavigationViewElastic: View {
     let title: String
     let blurStyle: UIBlurEffect.Style
@@ -23,7 +25,7 @@ public struct NavigationViewElastic: View {
         title: String,
         blurStyle: UIBlurEffect.Style = .regular,
         content: AnyView,
-        subtitleContent: AnyView,
+        subtitleContent: AnyView = AnyView(EmptyView()),
         primaryActionLabel: AnyView? = nil,
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
@@ -36,7 +38,6 @@ public struct NavigationViewElastic: View {
         self.stopRefreshing = stopRefreshing
         self.onRefresh = onRefresh
     }
-
 
     private let largeTitleSupposedHeight: CGFloat = 40
     private let largeTitleAdditionalTopPadding: CGFloat = 20
