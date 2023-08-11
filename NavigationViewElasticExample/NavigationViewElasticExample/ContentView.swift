@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationViewElastic(
-            title: "Products lalala",
+            title: "Products",
             blurStyle: .systemChromeMaterial,
             content:
                 LazyVStack {
@@ -26,19 +26,7 @@ struct ContentView: View {
                 .eraseToAnyView()
             ,
             subtitleContent:
-                HStack {
-                    Button("Stop") {
-                        stopRefreshing = true
-                    }
-
-                    Button("Reset") {
-                        stopRefreshing = false
-                    }
-
-                    Text("value: \(stopRefreshing ? 1 : 0)")
-                }
-                .frame(height: 70)
-//                filterFeed
+                filterFeed
                 .eraseToAnyView()
                 ,
             primaryActionLabel:
@@ -51,7 +39,10 @@ struct ContentView: View {
                 .eraseToAnyView(),
             stopRefreshing: $stopRefreshing,
             onRefresh: {
-                print("Refresh requested!")
+                stopRefreshing = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    stopRefreshing = true
+                }
             }
         )
     }
