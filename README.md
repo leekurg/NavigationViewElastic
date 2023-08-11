@@ -2,7 +2,7 @@
 Mimic of `NavigationView` + `ScrollView`, with ability to add any content under title of top bar.
 
 <p align="center">
-    <img src="https://github.com/leekurg/NavigationViewElastic/assets/105886145/294a60f7-ba43-4360-954e-96c9dd11158f" width="300">
+    <img src="https://github.com/leekurg/NavigationViewElastic/assets/105886145/1a3d93de-2cef-4204-94b0-202b16337b35" width="300">
 </p>
 
 ### Overview
