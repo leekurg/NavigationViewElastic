@@ -15,28 +15,9 @@ struct ContentView: View {
         NavigationViewElastic(
             title: "Products",
             blurStyle: .systemChromeMaterial,
-            content:
-                LazyVStack {
-                    ForEach(1...100, id: \.self) { value in
-                        SampleCard(title: "\(value)")
-                            .paddingWhen(.top, 10) { value == 1 }
-                    }
-                }
-                .padding(.horizontal, 10)
-                .eraseToAnyView()
-            ,
-            subtitleContent:
-                filterFeed
-                .eraseToAnyView()
-                ,
-            primaryActionLabel:
-                Button(action: {
-
-                }, label: {
-                    Image(systemName: "heart")
-                        .font(.system(size: 20, weight: .bold))
-                })
-                .eraseToAnyView(),
+            content: content,
+            subtitleContent: subtitleContent,
+            primaryActionLabel: primaryActionLabel,
             stopRefreshing: $stopRefreshing,
             onRefresh: {
                 stopRefreshing = false
@@ -47,17 +28,18 @@ struct ContentView: View {
         )
     }
 
-    enum Product: String, CaseIterable {
-        case all = "All"
-        case cake = "Cake"
-        case lemon = "Lemon"
-        case broccoli = "Broccoli"
-        case milk = "Milk"
-        case sausages = "Sausages"
-        case icecream = "Ice cream"
+    private var content: AnyView {
+        LazyVStack {
+            ForEach(1...2, id: \.self) { value in
+                SampleCard(title: "\(value)")
+                    .paddingWhen(.top, 10) { value == 1 }
+            }
+        }
+        .padding(.horizontal, 10)
+        .eraseToAnyView()
     }
 
-    var filterFeed: some View {
+    private var subtitleContent: AnyView {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 5) {
                 ForEach(Product.allCases, id: \.self) { entry in
@@ -76,6 +58,30 @@ struct ContentView: View {
             }
         }
         .padding(.bottom, 10)
+        .eraseToAnyView()
+    }
+
+    private var primaryActionLabel: AnyView {
+        Button(
+            action: {},
+            label: {
+                Image(systemName: "heart")
+                    .font(.system(size: 20, weight: .bold))
+            }
+        )
+        .eraseToAnyView()
+    }
+}
+
+extension ContentView {
+    enum Product: String, CaseIterable {
+        case all = "All"
+        case cake = "Cake"
+        case lemon = "Lemon"
+        case broccoli = "Broccoli"
+        case milk = "Milk"
+        case sausages = "Sausages"
+        case icecream = "Ice cream"
     }
 }
 
