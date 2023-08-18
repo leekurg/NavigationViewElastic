@@ -5,28 +5,27 @@
 import SwiftUI
 import Foundation
 
-/// Custom navigation bar.
-/// Was created to mimic system navigation bar with ability to add custom content in the bottom of bar.
+/// Custom view with navigation bar. Provides a scrollable container for user's content and container
+/// to present user's subtitle content.
+///
+/// Created to mimic system navigation bar with ability to add custom content in the bottom of bar.
 /// Also provide *onRefresh* method suitable for UDF-like using.
 ///
-/// *content*, *primaryActionLabel*  and *subtitleContent* is not *() -> Content* on purpose. That was made
-/// to prevent their content redrawing during scrolling.
-///
-public struct NavigationViewElastic: View {
+public struct NavigationViewElastic<C: View, S: View, P: View>: View {
     let title: String
     let blurStyle: UIBlurEffect.Style
-    let content: AnyView
-    let subtitleContent: AnyView
-    let primaryActionLabel: AnyView?
+    @ViewBuilder let content: () -> C
+    @ViewBuilder let subtitleContent: () -> S
+    @ViewBuilder let trailingBarItem: () -> P
     let stopRefreshing: Binding<Bool>
     let onRefresh: (() -> Void)?
 
     public init(
-        title: String,
-        blurStyle: UIBlurEffect.Style = .regular,
-        content: AnyView,
-        subtitleContent: AnyView = AnyView(EmptyView()),
-        primaryActionLabel: AnyView? = nil,
+        title: String = "",
+        blurStyle: UIBlurEffect.Style = .systemMaterial,
+        content: @escaping () -> C,
+        subtitleContent: @escaping () -> S = { EmptyView() },
+        trailingBarItem: @escaping () -> P = { EmptyView() },
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
@@ -34,7 +33,7 @@ public struct NavigationViewElastic: View {
         self.blurStyle = blurStyle
         self.content = content
         self.subtitleContent = subtitleContent
-        self.primaryActionLabel = primaryActionLabel
+        self.trailingBarItem = trailingBarItem
         self.stopRefreshing = stopRefreshing
         self.onRefresh = onRefresh
     }
@@ -55,7 +54,7 @@ public struct NavigationViewElastic: View {
     public var body: some View {
         ZStack(alignment: .top) {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
-                content
+                content()
                     .padding(.top, navigationViewSize.height + titleTopPaddingBlock)
             }
             .onChange(of: scrollOffset) { offset in
@@ -73,7 +72,6 @@ public struct NavigationViewElastic: View {
                     withAnimation(.easeIn(duration: 0.3)) {
                         isRefreshing = false
                     }
-                    print("Stop refresh received!!!")
                 }
             }
             .onChange(of: isRefreshing) { refreshing in
@@ -83,6 +81,45 @@ public struct NavigationViewElastic: View {
             navigationView
         }
         .ignoresSafeArea(.container, edges: .top)
+    }
+}
+
+//// MARK: - Public API
+public extension NavigationViewElastic {
+    func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
+        NavigationViewElastic(
+            title: self.title,
+            blurStyle: self.blurStyle,
+            content: self.content,
+            subtitleContent: self.subtitleContent,
+            trailingBarItem: self.trailingBarItem,
+            stopRefreshing: stopRefreshing,
+            onRefresh: onRefresh
+        )
+    }
+
+    func navigationTitle(_ title: String) -> Self {
+        NavigationViewElastic(
+            title: title,
+            blurStyle: self.blurStyle,
+            content: self.content,
+            subtitleContent: self.subtitleContent,
+            trailingBarItem: self.trailingBarItem,
+            stopRefreshing: self.stopRefreshing,
+            onRefresh: self.onRefresh
+        )
+    }
+
+    func blurStyle(_ blurStyle: UIBlurEffect.Style) -> Self {
+        NavigationViewElastic(
+            title: self.title,
+            blurStyle: blurStyle,
+            content: self.content,
+            subtitleContent: self.subtitleContent,
+            trailingBarItem: self.trailingBarItem,
+            stopRefreshing: self.stopRefreshing,
+            onRefresh: self.onRefresh
+        )
     }
 }
 
@@ -132,7 +169,7 @@ private extension NavigationViewElastic {
                         )
                     )
 
-                subtitleContent
+                subtitleContent()
 
                 if scrollOffset.isScrolledUp() {
                     Divider()
@@ -155,9 +192,10 @@ private extension NavigationViewElastic {
             HStack {
                 Spacer()
 
-                primaryActionLabel
+                trailingBarItem()
+                    .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .trailing)
+                    .clipped()
             }
-            .padding(.trailing, 10)
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, 7)
@@ -197,13 +235,10 @@ private extension NavigationViewElastic {
     @ViewBuilder
     var largeTitleBackground: some View {
         if titleTopPaddingBlock < largeTitleAdditionalTopPadding {
-            BlurEffect(style: .systemMaterial)
+            BlurEffect(style: blurStyle)
+                .allowsHitTesting(false)    //fix blur intercepting some touches
         } else {
-            if colorScheme == .dark {
-                Color.black
-            } else {
-                Color.white
-            }
+            colorScheme == .dark ? Color.black : Color.white
         }
     }
 
