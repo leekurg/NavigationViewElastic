@@ -19,26 +19,26 @@ Repository includes a package with **NavigationViewElastic** for install and pro
 
 ### Limitations
 - When `content`'s height is lesser than screen size - content is unable to scroll up 😓
-- All passing content is `AnyView` due to performance reasons: to `SwiftUI` trying redrawing it on any scroll changes 😓
 
 ### Install
 `SPM` installation: in **Xcode** tap «**File → Add packages…**», paste is search field the URL of this page and press «**Add package**».
 
 ### Usage
-Annotate `SwiftUI` file with «**import NavigationViewElastic**». Then pass a `content` variable with your main content, `subtitleContent` with additional view for displaying at the bottom of navigation bar, and, optionaly, `onRefresh()` closure and `stopRefreshing` value if you need *Pull-to-refresh* ability.
+Annotate `SwiftUI` file with «**import NavigationViewElastic**». Then pass to **NavigationViewElastic** a `content` `@ViewBuilder` with your main content, `subtitleContent` `@ViewBuilder` with additional view for displaying at the bottom of navigation bar. Optionaly, you can use modifier-like functions to configure component: `.refreshable()` for *Pull-to-refresh* ability, `.navigationTitle()` and `blurStyle()`.
 
 ```
 var body: some View {
-        NavigationViewElastic(
-            title: «Some title»,
-            content: content,
-            subtitleContent: subtitleContent,
-            primaryActionLabel: primaryActionLabel,
-            stopRefreshing: $stopRefreshing,
-            onRefresh: {
-                //on refresh actions
+        NavigationViewElastic {
+            VStack {
+                ///...
             }
-        )
+        } subtitleContent: {
+            Button("Subtitle button") { }
+        } trailingBarItem: {
+            Button("Bar button") { }
+        }
+        .navigationTitle("Title")
+        .refreshable(stopRefreshing: .constant(false), onRefresh: { } )
     }
 }
 ```
