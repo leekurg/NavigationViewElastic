@@ -27,7 +27,7 @@ struct NavigationBarView<S: View, T: View>: View {
             smallTitleLayer
 
             progressView
-                .padding(.top, config.navigationViewLargeTitleTopPadding + 10)
+                .padding(.top, config.largeTitle.topPadding + 10)
         }
     }
 }
@@ -53,7 +53,7 @@ private extension NavigationBarView {
             smallTitleLayer
 
             progressView
-                .padding(.top, config.navigationViewLargeTitleTopPadding + 10)
+                .padding(.top, config.largeTitle.topPadding + 10)
         }
     }
 
@@ -72,9 +72,9 @@ private extension NavigationBarView {
                     .opacity(largeTitleOpacity)
                     .padding(
                         .init(
-                            top: config.navigationViewLargeTitleTopPadding,
+                            top: config.largeTitle.topPadding,
                             leading: 20,
-                            bottom: config.navigationViewLargeTitleBottomPadding,
+                            bottom: config.largeTitle.bottomPadding,
                             trailing: 10
                         )
                     )
@@ -110,9 +110,9 @@ private extension NavigationBarView {
         .frame(maxWidth: .infinity)
         .padding(.bottom, 7)
         .frame(
-            height: config.navigationViewLargeTitleTopPadding +
-            config.largeTitleSupposedHeight +
-            config.navigationViewLargeTitleBottomPadding,
+            height: config.largeTitle.topPadding +
+            config.largeTitle.supposedHeight +
+            config.largeTitle.bottomPadding,
             alignment: .bottom
         )
         .background(smallTitleBackground)
@@ -156,9 +156,9 @@ private extension NavigationBarView {
 
     var scrollFactor: CGFloat {
         if scrollOffset.isScrolledUp() {
-            return reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: config.heightToCover)
+            return reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: config.largeTitle.heightToCover)
         } else {
-            return config.heightToCover + -scrollOffset
+            return config.largeTitle.heightToCover + -scrollOffset
         }
     }
 
@@ -183,7 +183,7 @@ private extension NavigationBarView {
     }
 
     var isReadyToCollapse: Bool {
-        scrollFactor < config.largeTitleAdditionalTopPadding
+        scrollFactor < config.largeTitle.additionalTopPadding
     }
 }
 

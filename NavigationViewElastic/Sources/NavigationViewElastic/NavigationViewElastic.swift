@@ -51,7 +51,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
         ZStack(alignment: .top) {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
                 content()
-                    .padding(.top, navigationViewSize.height + config.heightToCover)
+                    .padding(.top, navigationViewSize.height + config.largeTitle.heightToCover)
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -134,28 +134,40 @@ public extension NavigationViewElastic {
 
 // MARK: - Config
 public struct NavigationViewConfig {
-    let largeTitleSupposedHeight: CGFloat
-    let navigationViewLargeTitleTopPadding: CGFloat
-    let navigationViewLargeTitleBottomPadding: CGFloat
-    let largeTitleAdditionalTopPadding: CGFloat
+    let largeTitle: LargeTitleConfig
     let progressTriggeringOffset: CGFloat
     let progressViewTargetHeight: CGFloat
 
-    var heightToCover: CGFloat { self.largeTitleSupposedHeight + self.largeTitleAdditionalTopPadding }
-
     public init(
-        largeTitleSupposedHeight: CGFloat = 40,
-        navigationViewLargeTitleTopPadding: CGFloat = 40,
-        navigationViewLargeTitleBottomPadding: CGFloat = 5,
-        largeTitleAdditionalTopPadding: CGFloat = 15,
+        largeTitleConfig: LargeTitleConfig = .init(),
         progressTriggeringOffset: CGFloat = 30,
         progressViewTargetHeight: CGFloat = 60
     ) {
-        self.largeTitleSupposedHeight = largeTitleSupposedHeight
-        self.navigationViewLargeTitleTopPadding = navigationViewLargeTitleTopPadding
-        self.navigationViewLargeTitleBottomPadding = navigationViewLargeTitleBottomPadding
-        self.largeTitleAdditionalTopPadding = largeTitleAdditionalTopPadding
+        self.largeTitle = largeTitleConfig
         self.progressTriggeringOffset = progressTriggeringOffset
         self.progressViewTargetHeight = progressViewTargetHeight
+    }
+}
+
+public extension NavigationViewConfig {
+    struct LargeTitleConfig {
+        let supposedHeight: CGFloat
+        let topPadding: CGFloat
+        let additionalTopPadding: CGFloat
+        let bottomPadding: CGFloat
+
+        var heightToCover: CGFloat { self.supposedHeight + self.additionalTopPadding }
+
+        public init(
+            supposedHeight: CGFloat = 40,
+            topPadding: CGFloat = 40,
+            additionalTopPadding: CGFloat = 15,
+            bottomPadding: CGFloat = 5
+        ) {
+            self.supposedHeight = supposedHeight
+            self.topPadding = topPadding
+            self.additionalTopPadding = additionalTopPadding
+            self.bottomPadding = bottomPadding
+        }
     }
 }
