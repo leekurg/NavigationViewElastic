@@ -42,7 +42,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
     private let largeTitleAdditionalTopPadding: CGFloat = 20
     private let navigationViewLargeTitleTopPadding: CGFloat = 40
     private let navigationViewLargeTitleBottomPadding: CGFloat = 5
-    private let progressTriggeringOffset: CGFloat = 20
+    private let progressTriggeringOffset: CGFloat = 30
     private let progressViewTargetHeight: CGFloat = 60
     private var heightToCover: CGFloat { largeTitleSupposedHeight + largeTitleAdditionalTopPadding }
 
@@ -58,7 +58,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
                 content()
                     .backgroundSizeReader(size: $contentSize)
-                    .padding(.top, navigationViewSize.height + titleTopPaddingBlock)
+                    .padding(.top, navigationViewSize.height + heightToCover)
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -161,6 +161,7 @@ private extension NavigationViewElastic {
                 Text(title)
                     .lineLimit(1)
                     .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .opacity(largeTitleOpacity)
                     .padding(
@@ -174,7 +175,7 @@ private extension NavigationViewElastic {
 
                 subtitleContent()
 
-                if scrollOffset.isScrolledUp() {
+                if isIntersectionWithContent {
                     Divider()
                 }
             }
@@ -215,12 +216,12 @@ private extension NavigationViewElastic {
 // MARK: - Computed props
 private extension NavigationViewElastic {
     var smallTitleOpacity: CGFloat {
-        scrollFactor < largeTitleAdditionalTopPadding ? 1 : 0
+        isReadyToCollapse ? 1 : 0
     }
 
     @ViewBuilder
     var smallTitleBackground: some View {
-        if scrollFactor < largeTitleAdditionalTopPadding {
+        if isIntersectionWithContent {
             Color.clear
         } else {
             colorScheme == .dark ? Color.black : Color.white
@@ -228,12 +229,12 @@ private extension NavigationViewElastic {
     }
 
     var largeTitleOpacity: CGFloat {
-        scrollFactor < largeTitleAdditionalTopPadding ? 0 : 1
+        isReadyToCollapse ? 0 : 1
     }
 
     @ViewBuilder
     var largeTitleBackground: some View {
-        if scrollFactor < largeTitleAdditionalTopPadding {
+        if isIntersectionWithContent {
             BlurEffect(style: blurStyle)
                 .allowsHitTesting(false)    //fix blur intercepting some touches
         } else {
@@ -241,25 +242,15 @@ private extension NavigationViewElastic {
         }
     }
 
-    var titleTopPaddingBlock: CGFloat {
-        // Padding to lower large title a bit to give it some upper space
-        if scrollOffset.isScrolledDown() {
-            var offset = -scrollOffset.y
-            offset = onRefresh != nil ? offset / 2 : offset
-            return heightToCover + offset
-        } else if isShortContent {
-            return heightToCover
-        } else {
-            return reduceScrollUpOffset(offsetY: scrollOffset.y, heightToCover: heightToCover)
-        }
+    var largeTitleScale: CGFloat {
+        scrollOffset.isScrolledUp() ? 1.0 : clamp((-scrollOffset.y + 1000) / 1000.0, min: 1.0, max: 1.1 )
     }
 
-    // allows scrolling up when content is lesser than screen height
     var scrollFactor: CGFloat {
-        if isShortContent && scrollOffset.isScrolledUp() {
+        if scrollOffset.isScrolledUp() {
             return reduceScrollUpOffset(offsetY: scrollOffset.y, heightToCover: heightToCover)
         } else {
-            return titleTopPaddingBlock
+            return heightToCover + -scrollOffset.y
         }
     }
 
@@ -279,19 +270,19 @@ private extension NavigationViewElastic {
         return opacity
     }
 
-    var isShortContent: Bool {
-        contentSize.height < UIScreen.height
+    var isIntersectionWithContent: Bool {
+        scrollFactor.isZero
+    }
+
+    var isReadyToCollapse: Bool {
+        scrollFactor < largeTitleAdditionalTopPadding
     }
 }
 
 // MARK: - Service func
 private extension NavigationViewElastic {
     func reduceScrollUpOffset(offsetY: CGFloat, heightToCover: CGFloat) -> CGFloat {
-        let offset = clamp(
-            offsetY,
-            min: 0,
-            max: heightToCover * 2
-        )
-        return clamp(heightToCover - offset / 2, min: 0)
+        let offset = clamp(offsetY, min: 0, max: heightToCover)
+        return clamp(heightToCover - offset, min: 0)
     }
 }
