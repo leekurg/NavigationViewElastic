@@ -9,8 +9,6 @@ import SwiftUI
 import NavigationViewElastic
 
 struct ContentView: View {
-    @State var stopRefreshing = false
-
     var body: some View {
         NavigationViewElastic(
             content: {
