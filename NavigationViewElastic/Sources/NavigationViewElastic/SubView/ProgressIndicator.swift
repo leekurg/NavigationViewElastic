@@ -20,6 +20,7 @@ struct ProgressIndicator: View {
         ActivityIndicator(isAnimating: isAnimating) {
             $0.style = .large
             $0.hidesWhenStopped = false
+            $0.color = .init(white: 0.8, alpha: 1)
         }
         .rotationEffect(isAnimating ? .degrees(180) : .degrees(0))
         .animation(

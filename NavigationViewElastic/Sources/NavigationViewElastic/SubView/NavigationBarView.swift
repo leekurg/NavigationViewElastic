@@ -34,17 +34,18 @@ struct NavigationBarView<S: View, T: View>: View {
 
 // MARK: - Internal Views
 private extension NavigationBarView {
+    @ViewBuilder
     var progressView: some View {
-        ProgressIndicator(
-            offset: scrollOffset,
-            isAnimating: isRefreshing,
-            startRevealOffset: config.progress.startRevealOffset,
-            revealedOffset: config.progress.revealedOffset,
-            isShowingLocked: isRefreshing
-        )
-        .opacity(progressOpacity)
-        .animation(.linear(duration: 0.1), value: progressOpacity)
-        .scaleEffect(0.8)
+        if isProgressVisible {
+            ProgressIndicator(
+                offset: scrollOffset,
+                isAnimating: isRefreshing,
+                startRevealOffset: config.progress.startRevealOffset,
+                revealedOffset: config.progress.revealedOffset,
+                isShowingLocked: isRefreshing
+            )
+            .scaleEffect(0.8)
+        }
     }
 
     var navigationView: some View {
@@ -163,9 +164,9 @@ private extension NavigationBarView {
         }
     }
 
-    var progressOpacity: Double {
-        guard isRefreshable else { return 0 }
-        return isRefreshing && isReadyToCollapse ? 0 : 1
+    var isProgressVisible: Bool {
+        guard isRefreshable else { return false }
+        return !(isRefreshing && isReadyToCollapse)
     }
 
     var isIntersectionWithContent: Bool {
