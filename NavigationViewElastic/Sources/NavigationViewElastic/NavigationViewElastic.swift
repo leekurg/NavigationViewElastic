@@ -56,7 +56,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
 
-                if scrollOffset.isScrolledDown(config.progressViewTargetHeight + config.progressTriggeringOffset) {
+                if scrollOffset.isScrolledDown(config.progress.triggeringOffset) {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     }
@@ -135,17 +135,14 @@ public extension NavigationViewElastic {
 // MARK: - Config
 public struct NavigationViewConfig {
     let largeTitle: LargeTitleConfig
-    let progressTriggeringOffset: CGFloat
-    let progressViewTargetHeight: CGFloat
+    let progress: ProgressConfig
 
     public init(
         largeTitleConfig: LargeTitleConfig = .init(),
-        progressTriggeringOffset: CGFloat = 30,
-        progressViewTargetHeight: CGFloat = 60
+        progress: ProgressConfig = .init()
     ) {
         self.largeTitle = largeTitleConfig
-        self.progressTriggeringOffset = progressTriggeringOffset
-        self.progressViewTargetHeight = progressViewTargetHeight
+        self.progress = progress
     }
 }
 
@@ -168,6 +165,21 @@ public extension NavigationViewConfig {
             self.topPadding = topPadding
             self.additionalTopPadding = additionalTopPadding
             self.bottomPadding = bottomPadding
+        }
+    }
+
+    struct ProgressConfig {
+        let startRevealOffset: CGFloat
+        let revealedOffset: CGFloat
+        let triggeringOffset: CGFloat
+
+        public init(
+            startRevealOffset: CGFloat = 30,
+            revealedOffset: CGFloat = 110
+        ) {
+            self.startRevealOffset = startRevealOffset
+            self.revealedOffset = revealedOffset
+            self.triggeringOffset = revealedOffset + 15
         }
     }
 }

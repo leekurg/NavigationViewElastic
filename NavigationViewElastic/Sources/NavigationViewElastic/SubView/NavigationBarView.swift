@@ -35,15 +35,16 @@ struct NavigationBarView<S: View, T: View>: View {
 // MARK: - Internal Views
 private extension NavigationBarView {
     var progressView: some View {
-        ActivityIndicator(isAnimating: isRefreshing) {
-            $0.hidesWhenStopped = false
-            $0.style = .large
-        }
-        .frame(maxWidth: .infinity)
-        .opacity(progressAppearFactor)
-        .opacity(1 - smallTitleOpacity)
-        .rotationEffect(.degrees(progressAppearFactor * 180))
-        .scaleEffect(clamp(progressAppearFactor - 0.2, min: 0.2))
+        ProgressIndicator(
+            offset: scrollOffset,
+            isAnimating: isRefreshing,
+            startRevealOffset: config.progress.startRevealOffset,
+            revealedOffset: config.progress.revealedOffset,
+            isShowingLocked: isRefreshing
+        )
+        .opacity(progressOpacity)
+        .animation(.linear(duration: 0.1), value: progressOpacity)
+        .scaleEffect(0.8)
     }
 
     var navigationView: some View {
@@ -162,20 +163,9 @@ private extension NavigationBarView {
         }
     }
 
-    var progressAppearFactor: Double {
+    var progressOpacity: Double {
         guard isRefreshable else { return 0 }
-        guard !isRefreshing else { return 1 }
-        guard scrollOffset.isScrolledDown() else { return 0 }
-
-        var offset: Double = clamp(
-            -scrollOffset,
-             min: config.progressTriggeringOffset,
-             max: config.progressTriggeringOffset + config.progressViewTargetHeight
-        )
-        offset -= config.progressTriggeringOffset
-        let opacity = clamp(offset / config.progressViewTargetHeight, min: 0, max: 1)
-
-        return opacity
+        return isRefreshing && isReadyToCollapse ? 0 : 1
     }
 
     var isIntersectionWithContent: Bool {

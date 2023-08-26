@@ -9,6 +9,8 @@ import SwiftUI
 import NavigationViewElastic
 
 struct ContentView: View {
+    @State var stopRefreshing = false
+
     var body: some View {
         NavigationViewElastic(
             content: {
@@ -24,7 +26,7 @@ struct ContentView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 5) {
                         ForEach(Product.allCases, id: \.self) { entry in
-                            Button(action: {}) {
+                            Button(action: { stopRefreshing = true }) {
                                 Text(entry.rawValue)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 5)
@@ -52,7 +54,7 @@ struct ContentView: View {
             }
         )
         .navigationTitle("Title")
-        .refreshable(stopRefreshing: .constant(false), onRefresh: {})
+        .refreshable(stopRefreshing: $stopRefreshing, onRefresh: {})
     }
 }
 
