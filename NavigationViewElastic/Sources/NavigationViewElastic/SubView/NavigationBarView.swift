@@ -36,27 +36,27 @@ struct NavigationBarView<S: View, T: View>: View {
 private extension NavigationBarView {
     @ViewBuilder
     var progressView: some View {
-        if isProgressVisible {
-            ProgressIndicator(
-                offset: scrollOffset,
-                isAnimating: isRefreshing,
-                startRevealOffset: config.progress.startRevealOffset,
-                revealedOffset: config.progress.revealedOffset,
-                isShowingLocked: isRefreshing
-            )
-            .scaleEffect(0.8)
+        VStack {
+            if isProgressVisible {
+                ProgressIndicator(
+                    offset: scrollOffset,
+                    isAnimating: isRefreshing,
+                    startRevealOffset: config.progress.startRevealOffset,
+                    revealedOffset: config.progress.revealedOffset,
+                    isShowingLocked: isRefreshing
+                )
+                .scaleEffect(0.8)
+                .transition(
+                    .asymmetric(
+                        insertion: .identity,
+                        removal: .roll(.degrees(-180))
+                            .combined(with: .scale(scale: 0.1))
+                            .combined(with: .opacity)
+                    )
+                )
+            }
         }
-    }
-
-    var navigationView: some View {
-        ZStack(alignment: .top) {
-            largeTitleLayer
-
-            smallTitleLayer
-
-            progressView
-                .padding(.top, config.largeTitle.topPadding + 10)
-        }
+        .animation(.easeIn(duration: 0.2), value: isProgressVisible)
     }
 
     // MARK: - large title
@@ -166,7 +166,12 @@ private extension NavigationBarView {
 
     var isProgressVisible: Bool {
         guard isRefreshable else { return false }
-        return !(isRefreshing && isReadyToCollapse)
+
+        if isRefreshing {
+            return !isReadyToCollapse
+        }
+
+        return scrollOffset.isScrolledDown(1)
     }
 
     var isIntersectionWithContent: Bool {
