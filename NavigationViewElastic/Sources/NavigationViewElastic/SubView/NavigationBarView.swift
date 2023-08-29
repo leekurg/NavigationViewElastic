@@ -34,27 +34,29 @@ struct NavigationBarView<S: View, T: View>: View {
 
 // MARK: - Internal Views
 private extension NavigationBarView {
+    @ViewBuilder
     var progressView: some View {
-        ActivityIndicator(isAnimating: isRefreshing) {
-            $0.hidesWhenStopped = false
-            $0.style = .large
+        VStack {
+            if isProgressVisible {
+                ProgressIndicator(
+                    offset: scrollOffset,
+                    isAnimating: isRefreshing,
+                    startRevealOffset: config.progress.startRevealOffset,
+                    revealedOffset: config.progress.revealedOffset,
+                    isShowingLocked: isRefreshing
+                )
+                .scaleEffect(0.8)
+                .transition(
+                    .asymmetric(
+                        insertion: .identity,
+                        removal: .roll(.degrees(-180))
+                            .combined(with: .scale(scale: 0.1))
+                            .combined(with: .opacity)
+                    )
+                )
+            }
         }
-        .frame(maxWidth: .infinity)
-        .opacity(progressAppearFactor)
-        .opacity(1 - smallTitleOpacity)
-        .rotationEffect(.degrees(progressAppearFactor * 180))
-        .scaleEffect(clamp(progressAppearFactor - 0.2, min: 0.2))
-    }
-
-    var navigationView: some View {
-        ZStack(alignment: .top) {
-            largeTitleLayer
-
-            smallTitleLayer
-
-            progressView
-                .padding(.top, config.largeTitle.topPadding + 10)
-        }
+        .animation(.easeIn(duration: 0.2), value: isProgressVisible)
     }
 
     // MARK: - large title
@@ -162,20 +164,14 @@ private extension NavigationBarView {
         }
     }
 
-    var progressAppearFactor: Double {
-        guard isRefreshable else { return 0 }
-        guard !isRefreshing else { return 1 }
-        guard scrollOffset.isScrolledDown() else { return 0 }
+    var isProgressVisible: Bool {
+        guard isRefreshable else { return false }
 
-        var offset: Double = clamp(
-            -scrollOffset,
-             min: config.progressTriggeringOffset,
-             max: config.progressTriggeringOffset + config.progressViewTargetHeight
-        )
-        offset -= config.progressTriggeringOffset
-        let opacity = clamp(offset / config.progressViewTargetHeight, min: 0, max: 1)
+        if isRefreshing {
+            return !isReadyToCollapse
+        }
 
-        return opacity
+        return scrollOffset.isScrolledDown(1)
     }
 
     var isIntersectionWithContent: Bool {
