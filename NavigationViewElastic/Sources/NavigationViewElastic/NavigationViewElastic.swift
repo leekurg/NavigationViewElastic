@@ -51,6 +51,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
         ZStack(alignment: .top) {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
                 content()
+                    .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, navigationViewSize.height + config.largeTitle.heightToCover)
             }
             .onChange(of: scrollOffset) { offset in
