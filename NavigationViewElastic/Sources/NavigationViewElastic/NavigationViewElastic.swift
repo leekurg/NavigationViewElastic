@@ -5,19 +5,23 @@
 import SwiftUI
 import Foundation
 
+/// Namespace for additional components
+public enum NVE { }
+
 /// Custom view with navigation bar. Provides a scrollable container for user's content and container
 /// to present user's subtitle content.
 ///
 /// Created to mimic system navigation bar with ability to add custom content in the bottom of bar.
 /// Also provide *onRefresh* method suitable for UDF-like using.
 ///
-public struct NavigationViewElastic<C: View, S: View, P: View>: View {
+public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     let title: String
     let blurStyle: UIBlurEffect.Style
     let config: NavigationViewConfig
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
-    @ViewBuilder let trailingBarItem: () -> P
+    @ViewBuilder let leadingBarItem: () -> L
+    @ViewBuilder let trailingBarItem: () -> T
     let stopRefreshing: Binding<Bool>
     let onRefresh: (() -> Void)?
 
@@ -27,7 +31,8 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
         config: NavigationViewConfig = .init(),
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
-        @ViewBuilder trailingBarItem: @escaping () -> P = { EmptyView() },
+        @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
+        @ViewBuilder trailingBarItem: @escaping () -> T = { EmptyView() },
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
@@ -36,6 +41,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
         self.config = config
         self.content = content
         self.subtitleContent = subtitleContent
+        self.leadingBarItem = leadingBarItem
         self.trailingBarItem = trailingBarItem
         self.stopRefreshing = stopRefreshing
         self.onRefresh = onRefresh
@@ -84,6 +90,7 @@ public struct NavigationViewElastic<C: View, S: View, P: View>: View {
                 isRefreshing: isRefreshing,
                 largeTitleLayerSize: $navigationViewSize,
                 subtitleContent: subtitleContent,
+                leadingBarItem: leadingBarItem,
                 trailingBarItem: trailingBarItem
             )
         }
@@ -100,6 +107,7 @@ public extension NavigationViewElastic {
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
+            leadingBarItem: self.leadingBarItem,
             trailingBarItem: self.trailingBarItem,
             stopRefreshing: stopRefreshing,
             onRefresh: onRefresh
@@ -113,6 +121,7 @@ public extension NavigationViewElastic {
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
+            leadingBarItem: self.leadingBarItem,
             trailingBarItem: self.trailingBarItem,
             stopRefreshing: self.stopRefreshing,
             onRefresh: self.onRefresh
@@ -126,6 +135,7 @@ public extension NavigationViewElastic {
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
+            leadingBarItem: self.leadingBarItem,
             trailingBarItem: self.trailingBarItem,
             stopRefreshing: self.stopRefreshing,
             onRefresh: self.onRefresh
