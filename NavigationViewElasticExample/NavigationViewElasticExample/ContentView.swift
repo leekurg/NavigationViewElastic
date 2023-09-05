@@ -44,6 +44,7 @@ struct ContentView: View {
                 }
                 .padding(.bottom, 10)
             },
+            leadingBarItem: { NVE.BackButton() },
             trailingBarItem: {
                 Button {
                 } label: {
@@ -99,7 +100,7 @@ struct SystemNavBarBackButton: View {
                 isActive: $isLinkActivated,
                 destination: { destination }
             ) {
-                Text("Go to")
+                Text("Go to NVE")
             }
             .onAppear {
                 isLinkActivated.toggle()
@@ -108,41 +109,20 @@ struct SystemNavBarBackButton: View {
     }
 
     var destination: some View {
-        VStack {
-            BackButton()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
-    }
-}
-
-struct BackButton: View {
-    var action: (() -> Void)? = nil
-    var title: String? = nil
-
-    @Environment(\.presentationMode) var presentationMode
-
-    var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 5) {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(Color.accentColor)
-                    .font(.system(size: 22, weight: .medium))
-
-                Text(title ?? "Back")
-            }
-            .padding(.init(top: 5, leading: 8, bottom: 5, trailing: 5))
-
-            .foregroundColor(Color.accentColor)
-        }
-    }
-
-    private func onTap() {
-        if let _ = action {
-            action?()
-        } else {
-            presentationMode.wrappedValue.dismiss()
-        }
+        NavigationViewElastic(
+            title: "Cards",
+            content: {
+                LazyVStack {
+                    ForEach(1...20, id: \.self) { value in
+                        SampleCard(title: "\(value)")
+                            .paddingWhen(.top, 10) { value == 1 }
+                    }
+                }
+                .padding(.horizontal, 10)
+            },
+            leadingBarItem: { NVE.BackButton() }
+        )
+        .navigationBarHidden(true)
     }
 }
 
@@ -152,6 +132,6 @@ struct ContentView_Previews: PreviewProvider {
 
         SystemNavBar().previewDisplayName("System")
 
-        SystemNavBarBackButton().previewDisplayName("Back")
+        SystemNavBarBackButton().previewDisplayName("Back button")
     }
 }

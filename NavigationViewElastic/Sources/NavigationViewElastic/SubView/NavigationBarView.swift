@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NavigationBarView<S: View, T: View>: View {
+struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String
     let blurStyle: UIBlurEffect.Style
     let config: NavigationViewConfig
@@ -16,6 +16,7 @@ struct NavigationBarView<S: View, T: View>: View {
     let isRefreshing: Bool
     let largeTitleLayerSize: Binding<CGSize>
     @ViewBuilder let subtitleContent: () -> S
+    @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
 
     @Environment(\.colorScheme) var colorScheme
@@ -102,6 +103,10 @@ private extension NavigationBarView {
                 .animation(.easeIn(duration: 0.2), value: smallTitleOpacity)
 
             HStack {
+                leadingBarItem()
+                    .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .leading)
+                    .clipped()
+
                 Spacer()
 
                 trailingBarItem()
