@@ -1,5 +1,5 @@
 //
-//  NavigationBackButton.swift
+//  BackButton.swift
 //  
 //
 //  Created by Илья Аникин on 31.08.2023.
