@@ -14,10 +14,11 @@ struct ContentView: View {
     var body: some View {
         NavigationViewElastic(
             content: {
+                SpacerFixed(10)
+
                 LazyVStack {
                     ForEach(1...20, id: \.self) { value in
                         SampleCard(title: "\(value)")
-                            .paddingWhen(.top, 10) { value == 1 }
                     }
                 }
                 .padding(.horizontal, 10)

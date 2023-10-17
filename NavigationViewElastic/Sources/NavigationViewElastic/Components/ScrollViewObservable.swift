@@ -60,3 +60,42 @@ private extension PositionObservingView {
         static func reduce(value: inout CGPoint, nextValue: () -> CGPoint) { }
     }
 }
+
+struct ScrollView_Proxy<Content: View>: View {
+    @State var offset: CGPoint = .zero
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            ScrollViewObservable(offset: $offset) {
+                content()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 100)
+            }
+            .onChange(of: offset) { value in
+                print("offset: \(offset.y)")
+            }
+        }
+        .ignoresSafeArea(.container, edges: .top)
+    }
+}
+
+#Preview {
+    ScrollView_Proxy() {
+        LazyVStack {
+            ForEach(1...20, id: \.self) { id in
+                SampleCard()
+            }
+        }
+        .border(.green)
+        .padding(.horizontal)
+    }
+}
+
+fileprivate struct SampleCard: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 15)
+            .fill(.red)
+            .frame(height: 150)
+    }
+}

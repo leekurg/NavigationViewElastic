@@ -16,6 +16,7 @@
 		1E0DEB9A2A693B8E00706827 /* SampleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0DEB992A693B8E00706827 /* SampleCard.swift */; };
 		1E0DEB9C2A6940AD00706827 /* BlurEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0DEB9B2A6940AD00706827 /* BlurEffect.swift */; };
 		1E0DEB9F2A69431500706827 /* NavigationViewElastic in Frameworks */ = {isa = PBXBuildFile; productRef = 1E0DEB9E2A69431500706827 /* NavigationViewElastic */; };
+		1E97592B2ADE798B0036CED7 /* SpacerFixed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E97592A2ADE798B0036CED7 /* SpacerFixed.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		1E0DEB992A693B8E00706827 /* SampleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCard.swift; sourceTree = "<group>"; };
 		1E0DEB9B2A6940AD00706827 /* BlurEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurEffect.swift; sourceTree = "<group>"; };
 		1E0DEB9D2A69430C00706827 /* NavigationViewElastic */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = NavigationViewElastic; path = ../NavigationViewElastic; sourceTree = "<group>"; };
+		1E97592A2ADE798B0036CED7 /* SpacerFixed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacerFixed.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 			children = (
 				1E0DEB992A693B8E00706827 /* SampleCard.swift */,
 				1E0DEB9B2A6940AD00706827 /* BlurEffect.swift */,
+				1E97592A2ADE798B0036CED7 /* SpacerFixed.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -184,6 +187,7 @@
 				1E0DEB952A693A7200706827 /* View+Extensions.swift in Sources */,
 				1E0DEB9A2A693B8E00706827 /* SampleCard.swift in Sources */,
 				1E0DEB9C2A6940AD00706827 /* BlurEffect.swift in Sources */,
+				1E97592B2ADE798B0036CED7 /* SpacerFixed.swift in Sources */,
 				1E0DEB822A6939CF00706827 /* NavigationViewElasticExampleApp.swift in Sources */,
 				1E0DEB972A693A9600706827 /* Color+Extensions.swift in Sources */,
 			);
@@ -314,7 +318,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"NavigationViewElasticExample/Preview Content\"";
-				DEVELOPMENT_TEAM = 874VNVA6W9;
+				DEVELOPMENT_TEAM = 8TYVWGLLK2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -347,7 +351,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"NavigationViewElasticExample/Preview Content\"";
-				DEVELOPMENT_TEAM = 874VNVA6W9;
+				DEVELOPMENT_TEAM = 8TYVWGLLK2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
