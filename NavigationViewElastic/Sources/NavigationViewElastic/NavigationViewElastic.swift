@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Foundation
+import OSLog
 
 /// Namespace for additional components
 public enum NVE { }
@@ -56,9 +57,11 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     public var body: some View {
         ZStack(alignment: .top) {
             ScrollViewObservable(showsIndicators: false, offset: $scrollOffset) {
-                content()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, navigationViewSize.height + config.largeTitle.heightToCover)
+                VStack(spacing: 0) {    //VStack wrapper for ability to add spacing on content's top (occured on iOS 17)
+                    content()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, navigationViewSize.height + config.largeTitle.heightToCover)
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -193,4 +196,8 @@ public extension NavigationViewConfig {
             self.triggeringOffset = revealedOffset + 15
         }
     }
+}
+
+fileprivate extension NVE {
+    static let logger = Logger(subsystem: "NVE", category: "NavigationViewElastic")
 }

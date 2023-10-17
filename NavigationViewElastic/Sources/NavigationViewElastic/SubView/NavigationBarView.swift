@@ -5,6 +5,7 @@
 //  Created by Илья Аникин on 25.08.2023.
 //
 
+import OSLog
 import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
@@ -162,11 +163,12 @@ private extension NavigationBarView {
     }
 
     var scrollFactor: CGFloat {
-        if scrollOffset.isScrolledUp() {
-            return reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: config.largeTitle.heightToCover)
-        } else {
-            return config.largeTitle.heightToCover + -scrollOffset
-        }
+        let newValue = scrollOffset.isScrolledUp()
+            ? reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: config.largeTitle.heightToCover)
+            : config.largeTitle.heightToCover + -scrollOffset
+
+        NVE.barLogger.log("scrollFactor: \(newValue)")
+        return newValue
     }
 
     var isProgressVisible: Bool {
@@ -194,4 +196,8 @@ private extension NavigationBarView {
         let offset = clamp(offsetY, min: 0, max: heightToCover)
         return clamp(heightToCover - offset, min: 0)
     }
+}
+
+fileprivate extension NVE {
+    static let barLogger = Logger(subsystem: "NVE", category: "Bar")
 }

@@ -9,14 +9,7 @@ import SwiftUI
 
 extension View {
     func paddingWhen(_ edges: Edge.Set = .all, _ length: CGFloat? = nil, when condition: () -> Bool) -> some View {
-        Group {
-            if !condition() {
-                self
-            }
-            else {
-                self.padding(edges, length)
-            }
-        }
+        self.padding(edges, condition() ? length : 0)
     }
 
     func eraseToAnyView() -> AnyView {
