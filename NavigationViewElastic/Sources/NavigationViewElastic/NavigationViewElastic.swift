@@ -16,7 +16,6 @@ public enum NVE { }
 /// Also provide *onRefresh* method suitable for UDF-like using.
 ///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
-    let title: String
     let blurStyle: UIBlurEffect.Style
     let config: NavigationViewConfig
     @ViewBuilder let content: () -> C
@@ -26,8 +25,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     let stopRefreshing: Binding<Bool>
     let onRefresh: (() -> Void)?
 
+    @State private var title: String?
+
     public init(
-        title: String = "",
         blurStyle: UIBlurEffect.Style = .systemMaterial,
         config: NavigationViewConfig = .init(),
         @ViewBuilder content: @escaping () -> C,
@@ -37,7 +37,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
-        self.title = title
         self.blurStyle = blurStyle
         self.config = config
         self.content = content
@@ -61,7 +60,10 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     content()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, navigationViewSize.height + config.largeTitle.heightToCover)
+                .padding(.top, navigationViewSize.height + extraHeightToCover)
+				.onPreferenceChange(TitleKey.self) { newTitle in
+                	title = newTitle
+                }
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -88,6 +90,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 title: title,
                 blurStyle: blurStyle,
                 config: config,
+                extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
                 isRefreshable: onRefresh != nil,
                 isRefreshing: isRefreshing,
@@ -99,13 +102,19 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         }
         .ignoresSafeArea(.container, edges: .top)
     }
+
+    var extraHeightToCover: CGFloat {
+        return title == nil
+                ? config.largeTitle.additionalTopPadding
+                : config.largeTitle.additionalTopPadding
+                    + config.largeTitle.supposedHeight
+    }
 }
 
 // MARK: - Public API
 public extension NavigationViewElastic {
     func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
         Self(
-            title: self.title,
             blurStyle: self.blurStyle,
             config: self.config,
             content: self.content,
@@ -119,7 +128,6 @@ public extension NavigationViewElastic {
 
     func navigationTitle(_ title: String) -> Self {
         Self(
-            title: title,
             blurStyle: self.blurStyle,
             config: self.config,
             content: self.content,
@@ -133,7 +141,6 @@ public extension NavigationViewElastic {
 
     func blurStyle(_ blurStyle: UIBlurEffect.Style) -> Self {
         Self(
-            title: self.title,
             blurStyle: blurStyle,
             config: self.config,
             content: self.content,
@@ -146,55 +153,18 @@ public extension NavigationViewElastic {
     }
 }
 
-// MARK: - Config
-public struct NavigationViewConfig {
-    let largeTitle: LargeTitleConfig
-    let progress: ProgressConfig
-
-    public init(
-        largeTitleConfig: LargeTitleConfig = .init(),
-        progress: ProgressConfig = .init()
-    ) {
-        self.largeTitle = largeTitleConfig
-        self.progress = progress
+// MARK: - Preferences
+public extension View {
+    func navigationElasticTitle(_ title: String? = nil) -> some View {
+        preference(key: TitleKey.self, value: title)
     }
 }
 
-public extension NavigationViewConfig {
-    struct LargeTitleConfig {
-        let supposedHeight: CGFloat
-        let topPadding: CGFloat
-        let additionalTopPadding: CGFloat
-        let bottomPadding: CGFloat
+private struct TitleKey: PreferenceKey {
+    static var defaultValue: String? = nil
 
-        var heightToCover: CGFloat { self.supposedHeight + self.additionalTopPadding }
-
-        public init(
-            supposedHeight: CGFloat = 40,
-            topPadding: CGFloat = 40,
-            additionalTopPadding: CGFloat = 15,
-            bottomPadding: CGFloat = 5
-        ) {
-            self.supposedHeight = supposedHeight
-            self.topPadding = topPadding
-            self.additionalTopPadding = additionalTopPadding
-            self.bottomPadding = bottomPadding
-        }
-    }
-
-    struct ProgressConfig {
-        let startRevealOffset: CGFloat
-        let revealedOffset: CGFloat
-        let triggeringOffset: CGFloat
-
-        public init(
-            startRevealOffset: CGFloat = 30,
-            revealedOffset: CGFloat = 110
-        ) {
-            self.startRevealOffset = startRevealOffset
-            self.revealedOffset = revealedOffset
-            self.triggeringOffset = revealedOffset + 15
-        }
+    static func reduce(value: inout String?, nextValue: () -> String?) {
+        value = value ?? nextValue()
     }
 }
 

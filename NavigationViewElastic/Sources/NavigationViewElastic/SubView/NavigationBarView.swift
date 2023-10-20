@@ -9,9 +9,10 @@ import OSLog
 import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
-    let title: String
+    let title: String?
     let blurStyle: UIBlurEffect.Style
     let config: NavigationViewConfig
+    let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
     let isRefreshable: Bool
     let isRefreshing: Bool
@@ -68,7 +69,7 @@ private extension NavigationBarView {
                 .frame(height: scrollFactor)
 
             VStack(spacing: 0) {
-                Text(title)
+                Text(title ?? " ")
                     .lineLimit(1)
                     .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
                     .scaleEffect(largeTitleScale, anchor: .bottomLeading)
@@ -97,11 +98,13 @@ private extension NavigationBarView {
     // MARK: - small title
     var smallTitleLayer: some View {
         ZStack {
-            HStack { Text(title).lineLimit(1) }
-                .font(.system(size: 17, weight: .semibold))
-                .opacity(smallTitleOpacity)
-                .frame(maxWidth: UIScreen.width * 0.5)
-                .animation(.easeIn(duration: 0.2), value: smallTitleOpacity)
+            if let title = title {
+                HStack { Text(title).lineLimit(1) }
+                    .font(.system(size: 17, weight: .semibold))
+                    .opacity(smallTitleOpacity)
+                    .frame(maxWidth: UIScreen.width * 0.5)
+                    .animation(.easeIn(duration: 0.2), value: smallTitleOpacity)
+            }
 
             HStack {
                 leadingBarItem()
@@ -164,8 +167,8 @@ private extension NavigationBarView {
 
     var scrollFactor: CGFloat {
         let newValue = scrollOffset.isScrolledUp()
-            ? reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: config.largeTitle.heightToCover)
-            : config.largeTitle.heightToCover + -scrollOffset
+            ? reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: extraHeightToCover)
+            : extraHeightToCover + -scrollOffset
 
         NVE.barLogger.log("scrollFactor: \(newValue)")
         return newValue
