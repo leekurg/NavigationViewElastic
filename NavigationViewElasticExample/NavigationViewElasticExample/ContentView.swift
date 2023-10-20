@@ -21,6 +21,7 @@ struct ContentView: View {
                         SampleCard(title: "\(value)")
                     }
                 }
+                .navigationElasticTitle("Title")
                 .padding(.horizontal, 10)
             },
             subtitleContent: {
@@ -55,7 +56,6 @@ struct ContentView: View {
                 }
             }
         )
-        .navigationTitle("Title")
         .refreshable(stopRefreshing: $stopRefreshing, onRefresh: {})
     }
 }
@@ -111,7 +111,6 @@ struct SystemNavBarBackButton: View {
 
     var destination: some View {
         NavigationViewElastic(
-            title: "Cards",
             content: {
                 LazyVStack {
                     ForEach(1...20, id: \.self) { value in
