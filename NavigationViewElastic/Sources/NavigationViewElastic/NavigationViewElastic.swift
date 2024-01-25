@@ -50,6 +50,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
+    // Determines that swipe down gesture is released and component is
+    /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
+    @State private var isLockedForRefresh: Bool = false
 
     @Environment(\.colorScheme) var colorScheme
 
@@ -67,12 +70,14 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
+                if scrollOffset.y == 0 { isLockedForRefresh = false }
 
-                if scrollOffset.isScrolledDown(config.progress.triggeringOffset) {
+                if scrollOffset.isScrolledDown(config.progress.triggeringOffset) && !isLockedForRefresh {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     }
                     isRefreshing = true
+                    isLockedForRefresh = true
                 }
             }
             .onChange(of: stopRefreshing.wrappedValue) { stop in
