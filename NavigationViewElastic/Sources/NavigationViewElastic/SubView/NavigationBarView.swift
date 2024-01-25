@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
-    let blurStyle: UIBlurEffect.Style
+    let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
@@ -149,13 +149,11 @@ private extension NavigationBarView {
         isReadyToCollapse ? 0 : 1
     }
 
-    @ViewBuilder
-    var largeTitleBackground: some View {
+    var largeTitleBackground: AnyShapeStyle {
         if isIntersectionWithContent {
-            BlurEffect(style: blurStyle)
-                .allowsHitTesting(false)    //fix blur intercepting some touches
+            return backgroundStyle
         } else {
-            colorScheme == .dark ? Color.black : Color.white
+            return AnyShapeStyle(colorScheme == .dark ? Color.black : Color.white)
         }
     }
 

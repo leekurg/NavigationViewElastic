@@ -141,7 +141,7 @@ struct ProgressIndicator_Proxy: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 100, alignment: .bottom)
-        .background(BlurEffect(style: .regular))
+        .background(.regularMaterial)
     }
 }
 

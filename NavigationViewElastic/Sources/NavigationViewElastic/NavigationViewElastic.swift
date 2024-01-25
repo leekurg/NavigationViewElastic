@@ -16,7 +16,7 @@ public enum NVE { }
 /// Also provide *onRefresh* method suitable for UDF-like using.
 ///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
-    let blurStyle: UIBlurEffect.Style
+    let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
@@ -28,7 +28,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     @State private var title: String?
 
     public init(
-        blurStyle: UIBlurEffect.Style = .systemMaterial,
+        backgroundStyle: AnyShapeStyle = AnyShapeStyle(.regularMaterial),
         config: NavigationViewConfig = .init(),
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
@@ -37,7 +37,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
-        self.blurStyle = blurStyle
+        self.backgroundStyle = backgroundStyle
         self.config = config
         self.content = content
         self.subtitleContent = subtitleContent
@@ -93,7 +93,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
             NavigationBarView(
                 title: title,
-                blurStyle: blurStyle,
+                backgroundStyle: backgroundStyle,
                 config: config,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
@@ -120,7 +120,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 public extension NavigationViewElastic {
     func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
         Self(
-            blurStyle: self.blurStyle,
+            backgroundStyle: self.backgroundStyle,
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
@@ -133,7 +133,7 @@ public extension NavigationViewElastic {
 
     func navigationTitle(_ title: String) -> Self {
         Self(
-            blurStyle: self.blurStyle,
+            backgroundStyle: self.backgroundStyle,
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
@@ -144,9 +144,9 @@ public extension NavigationViewElastic {
         )
     }
 
-    func blurStyle(_ blurStyle: UIBlurEffect.Style) -> Self {
+    func backgroundStyle(_ style: AnyShapeStyle) -> Self {
         Self(
-            blurStyle: blurStyle,
+            backgroundStyle: style,
             config: self.config,
             content: self.content,
             subtitleContent: self.subtitleContent,
