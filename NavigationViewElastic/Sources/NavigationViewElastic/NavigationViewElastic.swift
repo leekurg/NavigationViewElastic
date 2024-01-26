@@ -70,7 +70,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
-                if scrollOffset.y == 0 { isLockedForRefresh = false }
+                if isLockedForRefresh && scrollOffset.y >= 0 { isLockedForRefresh = false }
 
                 if scrollOffset.isScrolledDown(config.progress.triggeringOffset) && !isLockedForRefresh {
                     if !isRefreshing {
