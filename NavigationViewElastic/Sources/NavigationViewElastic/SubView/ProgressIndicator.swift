@@ -135,9 +135,6 @@ struct ProgressIndicator_Proxy: View {
                 revealedOffset: 150,
                 isShowingLocked: false
             )
-            .onChange(of: scrollOffset) { value in
-                print(value)
-            }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 100, alignment: .bottom)
@@ -145,8 +142,6 @@ struct ProgressIndicator_Proxy: View {
     }
 }
 
-struct ProgressIndicator_Previews: PreviewProvider {
-    static var previews: some View {
-        ProgressIndicator_Proxy()
-    }
+#Preview {
+    ProgressIndicator_Proxy()
 }

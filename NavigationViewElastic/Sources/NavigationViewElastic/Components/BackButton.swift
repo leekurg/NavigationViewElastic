@@ -14,7 +14,7 @@ public extension NVE {
 
         @Environment(\.presentationMode) var presentationMode
 
-        public init(title: String? = nil,action: (() -> Void)? = nil) {
+        public init(title: String? = nil, action: (() -> Void)? = nil) {
             self.action = action
             self.title = title
         }
@@ -41,8 +41,6 @@ public extension NVE {
     }
 }
 
-struct NavigationBackButton_Previews: PreviewProvider {
-    static var previews: some View {
-        NVE.BackButton()
-    }
+#Preview {
+    NVE.BackButton()
 }

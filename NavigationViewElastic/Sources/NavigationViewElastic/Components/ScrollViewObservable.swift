@@ -7,15 +7,27 @@
 
 import SwiftUI
 
-struct ScrollViewObservable<Content: View>: View {
-    var axes: Axis.Set = [.vertical]
-    var showsIndicators = true
+public struct ScrollViewObservable<Content: View>: View {
+    private let axes: Axis.Set
+    private let showsIndicators: Bool
     @Binding var offset: CGPoint
     @ViewBuilder var content: () -> Content
 
     private let coordinateSpaceName = UUID()
 
-    var body: some View {
+    public init(
+        axes: Axis.Set = [.vertical],
+        showsIndicators: Bool = true,
+        offset: Binding<CGPoint>,
+        content: @escaping () -> Content
+    ) {
+        self.axes = axes
+        self.showsIndicators = showsIndicators
+        self._offset = offset
+        self.content = content
+    }
+
+    public var body: some View {
         ScrollView(axes, showsIndicators: showsIndicators) {
             PositionObservingView(
                 coordinateSpace: .named(coordinateSpaceName),

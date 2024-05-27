@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ActivityIndicator: UIViewRepresentable {
     typealias UIView = UIActivityIndicatorView
+
     var isAnimating: Bool
     private var configuration: (Self.UIView) -> Void
 
@@ -33,8 +34,6 @@ extension View where Self == ActivityIndicator {
     }
 }
 
-struct ActivityIndicator_Previews: PreviewProvider {
-    static var previews: some View {
-        ActivityIndicator(isAnimating: true)
-    }
+#Preview {
+    ActivityIndicator(isAnimating: true)
 }

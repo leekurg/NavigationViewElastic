@@ -2,9 +2,8 @@
 //  Created by Илья Аникин on 20.07.2023.
 //
 
-import SwiftUI
 import Foundation
-import OSLog
+import SwiftUI
 
 /// Namespace for additional components
 public enum NVE { }
@@ -15,6 +14,9 @@ public enum NVE { }
 /// Created to mimic system navigation bar with ability to add custom content in the bottom of bar.
 /// Also provide *onRefresh* method suitable for UDF-like using.
 ///
+/// KNOWN ISSUE: On iOS 17 when pulling for refresh, main content might be stuttering.
+/// It happens in underlying ScrollView when it's content changed to other view with different height.
+/// 
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
@@ -50,7 +52,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
-    // Determines that swipe down gesture is released and component is
+    /// Determines that swipe down gesture is released and component is
     /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
     @State private var isLockedForRefresh: Bool = false
 
@@ -64,9 +66,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, navigationViewSize.height + extraHeightToCover)
-				.onPreferenceChange(TitleKey.self) { newTitle in
-                	title = newTitle
-                }
+				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -74,7 +74,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
                 if scrollOffset.isScrolledDown(config.progress.triggeringOffset) && !isLockedForRefresh {
                     if !isRefreshing {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     }
                     isRefreshing = true
                     isLockedForRefresh = true
@@ -131,19 +131,6 @@ public extension NavigationViewElastic {
         )
     }
 
-    func navigationTitle(_ title: String) -> Self {
-        Self(
-            backgroundStyle: self.backgroundStyle,
-            config: self.config,
-            content: self.content,
-            subtitleContent: self.subtitleContent,
-            leadingBarItem: self.leadingBarItem,
-            trailingBarItem: self.trailingBarItem,
-            stopRefreshing: self.stopRefreshing,
-            onRefresh: self.onRefresh
-        )
-    }
-
     func backgroundStyle(_ style: AnyShapeStyle) -> Self {
         Self(
             backgroundStyle: style,
@@ -171,8 +158,4 @@ private struct TitleKey: PreferenceKey {
     static func reduce(value: inout String?, nextValue: () -> String?) {
         value = value ?? nextValue()
     }
-}
-
-fileprivate extension NVE {
-    static let logger = Logger(subsystem: "NVE", category: "NavigationViewElastic")
 }
