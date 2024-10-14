@@ -9,25 +9,28 @@ import SwiftUI
 
 public extension NVE {
     struct BackButton: View {
-        let title: String?
-        let action: (() -> Void)?
+        private let titleKey: LocalizedStringKey?
+        private let insets: EdgeInsets
+        private let action: (() -> Void)?
 
         @Environment(\.presentationMode) var presentationMode
+        @Environment(\.layoutDirection) private var layoutDirection
 
-        public init(title: String? = nil, action: (() -> Void)? = nil) {
+        public init(_ titleKey: LocalizedStringKey? = nil, insets: Insets = .nve, action: (() -> Void)? = nil) {
             self.action = action
-            self.title = title
+            self.titleKey = titleKey
+            self.insets = insets.insets
         }
 
         public var body: some View {
             Button(action: onTap) {
                 HStack(spacing: 5) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 22, weight: .medium))
+                    Image(systemName: layoutDirection == .leftToRight ? "chevron.left" : "chevron.right")
+                        .font(.system(size: 17, weight: .semibold))
 
-                    Text(title ?? "Back")
+                    Text(titleKey ?? "Back")
                 }
-                .padding(.init(top: 5, leading: 12, bottom: 5, trailing: 5))
+                .padding(insets)
             }
         }
 
@@ -41,6 +44,23 @@ public extension NVE {
     }
 }
 
+public extension NVE.BackButton {
+    enum Insets {
+        case nve
+        case system
+        case manual(insets: EdgeInsets)
+
+        var insets: EdgeInsets {
+            switch self {
+            case .nve: .init(top: 5, leading: 12, bottom: 5, trailing: 5)
+            case .system: .init(top: 5, leading: 0, bottom: 5, trailing: 5)
+            case .manual(let insets): insets
+            }
+        }
+    }
+}
+
 #Preview {
-    NVE.BackButton()
+    NVE.BackButton(insets: .system)
+        .border(.gray)
 }

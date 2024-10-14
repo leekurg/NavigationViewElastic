@@ -89,7 +89,7 @@ private extension NavigationBarView {
                     Divider()
                 }
             }
-            .backgroundSizeReader(size: largeTitleLayerSize)
+            .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
         }
         .background(largeTitleBackground)
     }
