@@ -64,34 +64,42 @@ private extension NavigationBarView {
     // MARK: - large title
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
-            Color.clear
-                .frame(height: scrollFactor)
-
-            VStack(spacing: 0) {
-                Text(title ?? " ")
-                    .lineLimit(1)
-                    .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
-                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(largeTitleOpacity)
-                    .padding(
-                        .init(
-                            top: config.largeTitle.topPadding,
-                            leading: 20,
-                            bottom: config.largeTitle.bottomPadding,
-                            trailing: 10
-                        )
+            Text(title ?? " ")
+                .lineLimit(1)
+                .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                .scaleEffect(largeTitleScale, anchor: .bottomLeading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .opacity(largeTitleOpacity)
+                .padding(
+                    .init(
+                        top: config.largeTitle.topPadding,
+                        leading: 20,
+                        bottom: config.largeTitle.bottomPadding,
+                        trailing: 10
                     )
+                )
 
-                subtitleContent()
+            subtitleContent()
 
-                if isIntersectionWithContent {
-                    Divider()
-                }
+            if isIntersectionWithContent {
+                Divider()
             }
-            .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
         }
+        .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
         .background(largeTitleBackground)
+        .offset(y: scrollFactor)
+        .frame(height: 500, alignment: .top)    //frame for masking, blends out everything below 500pt threshold
+        .reverseMask(alignment: .top) {
+            if !isIntersectionWithContent {
+                Rectangle()
+                    .frame(
+                        height: config.largeTitle.topPadding +
+                            config.largeTitle.supposedHeight +
+                            config.largeTitle.bottomPadding
+                    )
+            }
+        }
+        .frame(height: nil)
     }
 
     // MARK: - small title
@@ -125,7 +133,6 @@ private extension NavigationBarView {
             config.largeTitle.bottomPadding,
             alignment: .bottom
         )
-        .background(smallTitleBackground)
     }
 }
 
@@ -135,25 +142,12 @@ private extension NavigationBarView {
         isReadyToCollapse ? 1 : 0
     }
 
-    @ViewBuilder
-    var smallTitleBackground: some View {
-        if isIntersectionWithContent {
-            Color.clear
-        } else {
-            colorScheme == .dark ? Color.black : Color.white
-        }
-    }
-
     var largeTitleOpacity: CGFloat {
         isReadyToCollapse ? 0 : 1
     }
 
     var largeTitleBackground: AnyShapeStyle {
-        if isIntersectionWithContent {
-            return backgroundStyle
-        } else {
-            return AnyShapeStyle(colorScheme == .dark ? Color.black : Color.white)
-        }
+        isIntersectionWithContent ? backgroundStyle : AnyShapeStyle(.clear)
     }
 
 
