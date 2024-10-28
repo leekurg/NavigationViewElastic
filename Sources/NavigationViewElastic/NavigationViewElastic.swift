@@ -18,19 +18,19 @@ public enum NVE { }
 /// It happens in underlying ScrollView when it's content changed to other view with different height.
 /// 
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
-    let backgroundStyle: AnyShapeStyle
+    private var barStyle: AnyShapeStyle
     let config: NavigationViewConfig
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
-    let stopRefreshing: Binding<Bool>
-    let onRefresh: (() -> Void)?
+    private var stopRefreshing: Binding<Bool>
+    private var onRefresh: (() -> Void)?
 
     @State private var title: String?
 
     public init(
-        backgroundStyle: AnyShapeStyle = AnyShapeStyle(.regularMaterial),
+        barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
         config: NavigationViewConfig = .init(),
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
@@ -39,7 +39,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
-        self.backgroundStyle = backgroundStyle
+        self.barStyle = barStyle
         self.config = config
         self.content = content
         self.subtitleContent = subtitleContent
@@ -93,7 +93,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
             NavigationBarView(
                 title: title,
-                backgroundStyle: backgroundStyle,
+                backgroundStyle: barStyle,
                 config: config,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
@@ -119,29 +119,16 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 // MARK: - Public API
 public extension NavigationViewElastic {
     func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
-        Self(
-            backgroundStyle: self.backgroundStyle,
-            config: self.config,
-            content: self.content,
-            subtitleContent: self.subtitleContent,
-            leadingBarItem: self.leadingBarItem,
-            trailingBarItem: self.trailingBarItem,
-            stopRefreshing: stopRefreshing,
-            onRefresh: onRefresh
-        )
+        with(self) { copy in
+            copy.stopRefreshing = stopRefreshing
+            copy.onRefresh = onRefresh
+        }
     }
 
-    func backgroundStyle(_ style: AnyShapeStyle) -> Self {
-        Self(
-            backgroundStyle: style,
-            config: self.config,
-            content: self.content,
-            subtitleContent: self.subtitleContent,
-            leadingBarItem: self.leadingBarItem,
-            trailingBarItem: self.trailingBarItem,
-            stopRefreshing: self.stopRefreshing,
-            onRefresh: self.onRefresh
-        )
+    func barStyle<Bar: ShapeStyle>(_ style: Bar) -> Self {
+        with(self) { copy in
+            copy.barStyle = AnyShapeStyle(style)
+        }
     }
 }
 
