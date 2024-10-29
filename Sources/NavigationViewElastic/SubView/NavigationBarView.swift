@@ -29,7 +29,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
             smallTitleLayer
 
             progressView
-                .padding(.top, config.largeTitle.topPadding + 10)
+                .padding(.top, config.largeTitle.topEdgeInset + 10)
         }
     }
 }
@@ -72,7 +72,7 @@ private extension NavigationBarView {
                 .opacity(largeTitleOpacity)
                 .padding(
                     .init(
-                        top: config.largeTitle.topPadding,
+                        top: config.largeTitle.topEdgeInset,
                         leading: 20,
                         bottom: config.largeTitle.bottomPadding,
                         trailing: 10
@@ -86,20 +86,19 @@ private extension NavigationBarView {
             }
         }
         .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
-        .background(largeTitleBackground)
+        .background(backgroundStyle.opacity(barBackgroundOpacity))
         .offset(y: scrollFactor)
-        .frame(height: 500, alignment: .top)    //frame for masking, blends out everything below 500pt threshold
+        .frame(maxHeight: .infinity, alignment: .top)
         .reverseMask(alignment: .top) {
             if !isIntersectionWithContent {
                 Rectangle()
                     .frame(
-                        height: config.largeTitle.topPadding +
+                        height: config.largeTitle.topEdgeInset +
                             config.largeTitle.supposedHeight +
                             config.largeTitle.bottomPadding
                     )
             }
         }
-        .frame(height: nil)
     }
 
     // MARK: - small title
@@ -128,7 +127,7 @@ private extension NavigationBarView {
         .frame(maxWidth: .infinity)
         .padding(.bottom, 7)
         .frame(
-            height: config.largeTitle.topPadding +
+            height: config.largeTitle.topEdgeInset +
             config.largeTitle.supposedHeight +
             config.largeTitle.bottomPadding,
             alignment: .bottom
@@ -149,7 +148,6 @@ private extension NavigationBarView {
     var largeTitleBackground: AnyShapeStyle {
         isIntersectionWithContent ? backgroundStyle : AnyShapeStyle(.clear)
     }
-
 
     var largeTitleScale: CGFloat {
         guard !isRefreshable else { return 1.0 }
@@ -180,7 +178,17 @@ private extension NavigationBarView {
     }
 
     var isReadyToCollapse: Bool {
-        scrollFactor < config.largeTitle.additionalTopPadding
+        scrollFactor <= config.largeTitle.topPadding
+    }
+
+    var barBackgroundOpacity: CGFloat {
+        if !isIntersectionWithContent { return 0 }
+
+        return clamp(
+            abs(scrollOffset - extraHeightToCover) / config.largeTitle.backgroundOpacityThreshold,
+            min: 0,
+            max: 1
+        )
     }
 }
 

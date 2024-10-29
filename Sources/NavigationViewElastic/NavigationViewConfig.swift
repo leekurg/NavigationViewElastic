@@ -19,25 +19,54 @@ public struct NavigationViewConfig {
         self.largeTitle = largeTitleConfig
         self.progress = progress
     }
+
+    public static var `default` = Self()
 }
 
 public extension NavigationViewConfig {
+    /// Bar configuration scheme:
+    /// -------------
+    /// ```
+    ///                      screen top edge
+    /// |--------------------------------------------------------|
+    /// |                    [topEdgeInset]                      |
+    /// |--------------------------------------------------------|
+    /// | leading item      small title block      trailing item |
+    /// |--------------------------------------------------------|
+    /// |                      [topPadding]                      |
+    /// |--------------------------------------------------------|
+    /// |             large title block [supposedHeight]         |
+    /// |--------------------------------------------------------|
+    /// |                    [bottomPadding]                     |
+    /// |--------------------------------------------------------|
+    /// |                    subtitle content                    |
+    /// |--------------------------------------------------------|
+    /// ```
+    ///
     struct LargeTitleConfig {
+        /// Approximated large title text height
         let supposedHeight: CGFloat
+        /// Padding from top screen edge to top edge of small title block.
+        let topEdgeInset: CGFloat
+        /// Padding from top edge of large title block to title text itself.
         let topPadding: CGFloat
-        let additionalTopPadding: CGFloat
+        /// Padding from bottom edge of large title block to subtitle content.
         let bottomPadding: CGFloat
+        /// A threshold determines how to change bar's background opacity when it is collapsing.
+        let backgroundOpacityThreshold: CGFloat
 
         public init(
-            supposedHeight: CGFloat = 40, //approximated .largteTitle font height
-            topPadding: CGFloat = 40,
-            additionalTopPadding: CGFloat = 15,
-            bottomPadding: CGFloat = 5
+            supposedHeight: CGFloat = 40,
+            topEdgeInset: CGFloat = 40,
+            topPadding: CGFloat = 15,
+            bottomPadding: CGFloat = 5,
+            backgroundOpacityThreshold: CGFloat = 10
         ) {
             self.supposedHeight = supposedHeight
+            self.topEdgeInset = topEdgeInset
             self.topPadding = topPadding
-            self.additionalTopPadding = additionalTopPadding
             self.bottomPadding = bottomPadding
+            self.backgroundOpacityThreshold = backgroundOpacityThreshold
         }
     }
 
