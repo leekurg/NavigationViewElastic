@@ -13,8 +13,9 @@ public extension NVE {
         let action: (() -> Void)?
 
         @Environment(\.presentationMode) var presentationMode
+        @Environment(\.layoutDirection) private var layoutDirection
 
-        public init(title: String? = nil, action: (() -> Void)? = nil) {
+        public init(_ title: String? = nil, action: (() -> Void)? = nil) {
             self.action = action
             self.title = title
         }
@@ -22,10 +23,10 @@ public extension NVE {
         public var body: some View {
             Button(action: onTap) {
                 HStack(spacing: 5) {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: layoutDirection == .leftToRight ? "chevron.left" : "chevron.right")
                         .font(.system(size: 22, weight: .medium))
 
-                    Text(title ?? "Back")
+                    Text(title ?? "Back").lineLimit(1)
                 }
                 .padding(.init(top: 5, leading: 12, bottom: 5, trailing: 5))
             }
@@ -42,5 +43,6 @@ public extension NVE {
 }
 
 #Preview {
-    NVE.BackButton()
+    NVE.BackButton("Lorem imsum")
+        .environment(\.layoutDirection, .rightToLeft)
 }
