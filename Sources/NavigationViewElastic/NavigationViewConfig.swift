@@ -27,7 +27,7 @@ public extension NavigationViewConfig {
     /// Bar configuration scheme:
     /// -------------
     /// ```
-    ///                      screen top edge
+    ///                      safe area top edge
     /// |--------------------------------------------------------|
     /// |                    [topEdgeInset]                      |
     /// |--------------------------------------------------------|
@@ -46,7 +46,7 @@ public extension NavigationViewConfig {
     struct LargeTitleConfig {
         /// Approximated large title text height
         let supposedHeight: CGFloat
-        /// Padding from top screen edge to top edge of small title block.
+        /// Padding from safe area top edge to top edge of small title block.
         let topEdgeInset: CGFloat
         /// Padding from top edge of large title block to title text itself.
         let topPadding: CGFloat
@@ -57,7 +57,7 @@ public extension NavigationViewConfig {
 
         public init(
             supposedHeight: CGFloat = 40,
-            topEdgeInset: CGFloat = 40,
+            topEdgeInset: CGFloat = 0,
             topPadding: CGFloat = 15,
             bottomPadding: CGFloat = 5,
             backgroundOpacityThreshold: CGFloat = 10

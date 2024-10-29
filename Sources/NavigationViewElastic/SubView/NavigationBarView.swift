@@ -11,6 +11,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
     let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
+    let safeAreaInsetTop: CGFloat
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
     let isRefreshable: Bool
@@ -27,9 +28,10 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
             largeTitleLayer
 
             smallTitleLayer
+                .padding(.top, safeAreaInsetTop)
 
             progressView
-                .padding(.top, config.largeTitle.topEdgeInset + 10)
+                .padding(.top, safeAreaInsetTop + config.largeTitle.topEdgeInset + 5)
         }
     }
 }
@@ -82,7 +84,7 @@ private extension NavigationBarView {
             subtitleContent()
 
             if isIntersectionWithContent {
-                Divider()
+                Divider().opacity(barBackgroundOpacity)
             }
         }
         .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
@@ -93,9 +95,10 @@ private extension NavigationBarView {
             if !isIntersectionWithContent {
                 Rectangle()
                     .frame(
-                        height: config.largeTitle.topEdgeInset +
-                            config.largeTitle.supposedHeight +
-                            config.largeTitle.bottomPadding
+                        height: safeAreaInsetTop
+                            + config.largeTitle.topEdgeInset
+                            + config.largeTitle.supposedHeight
+                            + config.largeTitle.bottomPadding
                     )
             }
         }
@@ -156,9 +159,15 @@ private extension NavigationBarView {
     }
 
     var scrollFactor: CGFloat {
-        let newValue = scrollOffset.isScrolledUp()
-            ? reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: extraHeightToCover)
-            : extraHeightToCover + -scrollOffset
+        let newValue: CGFloat
+        let heightToCover = extraHeightToCover + safeAreaInsetTop
+
+        if scrollOffset.isScrolledUp() {
+            let offset = clamp(scrollOffset, min: 0, max: heightToCover)
+            newValue = clamp(heightToCover - offset, min: safeAreaInsetTop)
+        } else {
+            newValue = heightToCover - scrollOffset
+        }
 
         return newValue
     }
@@ -174,11 +183,11 @@ private extension NavigationBarView {
     }
 
     var isIntersectionWithContent: Bool {
-        scrollFactor.isZero
+        scrollFactor <= safeAreaInsetTop
     }
 
     var isReadyToCollapse: Bool {
-        scrollFactor <= config.largeTitle.topPadding
+        scrollFactor <= config.largeTitle.topPadding + safeAreaInsetTop
     }
 
     var barBackgroundOpacity: CGFloat {
@@ -189,13 +198,5 @@ private extension NavigationBarView {
             min: 0,
             max: 1
         )
-    }
-}
-
-// MARK: - Service func
-private extension NavigationBarView {
-    func reduceScrollUpOffset(offsetY: CGFloat, heightToCover: CGFloat) -> CGFloat {
-        let offset = clamp(offsetY, min: 0, max: heightToCover)
-        return clamp(heightToCover - offset, min: 0)
     }
 }
