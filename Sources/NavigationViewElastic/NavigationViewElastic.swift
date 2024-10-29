@@ -31,7 +31,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
     public init(
         barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
-        config: NavigationViewConfig = .init(),
+        config: NavigationViewConfig = .default,
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
         @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
@@ -110,8 +110,8 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
     var extraHeightToCover: CGFloat {
         return title == nil
-                ? config.largeTitle.additionalTopPadding
-                : config.largeTitle.additionalTopPadding
+                ? config.largeTitle.topPadding
+                : config.largeTitle.topPadding
                     + config.largeTitle.supposedHeight
     }
 }
