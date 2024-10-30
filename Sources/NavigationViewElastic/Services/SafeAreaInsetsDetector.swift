@@ -26,14 +26,13 @@ final class SafeAreaInsetsDetector: ObservableObject {
                 default: false
                 }
             }
-            // Delayed to allow clients fetch new orientation value directly from UIDevice
-            .delay(for: .milliseconds(1), scheduler: RunLoop.main)
+            // Delayed to allow clients fetch new orientation value directly from UIDevice.
+            // Scheduled to DispatchQueue.main because RunLoop.main could be busy with scroll events
+            // during scroll, and insets will not be updated until scroll events is processed (scrolling is stopped).
+            .delay(for: .milliseconds(1), scheduler: DispatchQueue.main)
             .map { _ in UIApplication.shared.keyWindowInsets() }
             .removeDuplicates()
-            .sink { [weak self] newInsets in
-                self?.insets = newInsets
-                print("🟡insets detected: \(self?.insets.top ?? -1)")
-            }
+            .sink { [weak self] in self?.insets = $0 }
             .store(in: &cancellables)
     }
 }

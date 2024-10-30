@@ -8,15 +8,14 @@ import SwiftUI
 /// Namespace for additional components
 public enum NVE { }
 
-/// Custom view with navigation bar. Provides a scrollable container for user's content and container
-/// to present user's subtitle content.
+/// Container with navigation bar and scrollable area, mimic of system's *NavigationStack* with ability to
+/// add user's content to the bottom of the navigation bar.
 ///
-/// Created to mimic system navigation bar with ability to add custom content in the bottom of bar.
-/// Also provide *onRefresh* method suitable for UDF-like using.
+/// Provides a vertical scrollable area for user's content and a variety of customizations for navigation bar.
 ///
-/// KNOWN ISSUE: On iOS 17 when pulling for refresh, main content might be stuttering.
-/// It happens in underlying ScrollView when it's content changed to other view with different height.
-/// 
+/// - Important: On **iOS 17** when pulling for refresh, main content might be stuttering.
+/// It happens in underlying `ScrollView` when it's content changed to other view with different height.
+///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     private var barStyle: AnyShapeStyle
     let config: NavigationViewConfig
@@ -26,8 +25,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     @ViewBuilder let trailingBarItem: () -> T
     private var stopRefreshing: Binding<Bool>
     private var onRefresh: (() -> Void)?
-
-    @State private var title: String?
 
     public init(
         barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
@@ -49,12 +46,14 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         self.onRefresh = onRefresh
     }
 
+    @State private var title: String?
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
     /// Determines that swipe down gesture is released and component is
     /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
     @State private var isLockedForRefresh: Bool = false
+
     @StateObject private var insetsDetector = SafeAreaInsetsDetector()
 
     public var body: some View {
