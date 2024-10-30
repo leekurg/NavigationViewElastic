@@ -47,6 +47,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     }
 
     @State private var title: String?
+    @State private var titleDisplayMode: NVE.TitleDisplayMode = .large
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
@@ -65,6 +66,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, navigationViewSize.height + extraHeightToCover + insetsDetector.insets.top)
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
+                .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -91,6 +93,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
             NavigationBarView(
                 title: title,
+                titleDisplayMode: titleDisplayMode,
                 backgroundStyle: barStyle,
                 config: config,
                 safeAreaInsets: insetsDetector.insets,
@@ -108,10 +111,12 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     }
 
     var extraHeightToCover: CGFloat {
-        return title == nil
-                ? config.largeTitle.topPadding
-                : config.largeTitle.topPadding
-                    + config.largeTitle.supposedHeight
+        guard title != nil else { return 0 }
+
+        return switch titleDisplayMode {
+        case .large: config.largeTitle.topPadding + config.largeTitle.supposedHeight
+        case .inline: 0
+        }
     }
 }
 
@@ -128,21 +133,6 @@ public extension NavigationViewElastic {
         with(self) { copy in
             copy.barStyle = AnyShapeStyle(style)
         }
-    }
-}
-
-// MARK: - Preferences
-public extension View {
-    func navigationElasticTitle(_ title: String? = nil) -> some View {
-        preference(key: TitleKey.self, value: title)
-    }
-}
-
-private struct TitleKey: PreferenceKey {
-    static var defaultValue: String? = nil
-
-    static func reduce(value: inout String?, nextValue: () -> String?) {
-        value = value ?? nextValue()
     }
 }
 

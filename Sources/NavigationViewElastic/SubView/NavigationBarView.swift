@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
+    let titleDisplayMode: NVE.TitleDisplayMode
     let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
     let safeAreaInsets: EdgeInsets
@@ -20,8 +21,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
-
-    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -146,7 +145,10 @@ private extension NavigationBarView {
     }
 
     var largeTitleOpacity: CGFloat {
-        isReadyToCollapse ? 0 : 1
+        switch titleDisplayMode {
+        case .large: isReadyToCollapse ? 0 : 1
+        case .inline: 0
+        }
     }
 
     var largeTitleBackground: AnyShapeStyle {
@@ -177,7 +179,7 @@ private extension NavigationBarView {
         guard isRefreshable else { return false }
 
         if isRefreshing {
-            return !isReadyToCollapse
+            return isReadyToCollapse ? (title == nil) : true
         }
 
         return scrollOffset.isScrolledDown(1)

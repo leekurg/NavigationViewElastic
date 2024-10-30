@@ -27,7 +27,8 @@ struct ProxyView: View {
                             }
                     }
                 }
-                .navigationElasticTitle("Title")
+                .nveTitle("Title")
+                .nveTitleDisplayMode(.inline)
                 .padding(.horizontal, 10)
             },
             subtitleContent: {
