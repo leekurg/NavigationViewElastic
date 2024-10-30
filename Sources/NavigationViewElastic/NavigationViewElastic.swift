@@ -55,9 +55,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     /// Determines that swipe down gesture is released and component is
     /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
     @State private var isLockedForRefresh: Bool = false
-    @State private var safeAreaInsets: EdgeInsets = UIApplication.shared.keyWindowInsets()
-
-    @Environment(\.colorScheme) var colorScheme
+    @StateObject private var insetsDetector = SafeAreaInsetsDetector()
 
     public var body: some View {
         ZStack(alignment: .top) {
@@ -66,17 +64,8 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     content()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, navigationViewSize.height + extraHeightToCover + safeAreaInsets.top)
+                .padding(.top, navigationViewSize.height + extraHeightToCover + insetsDetector.insets.top)
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
-            }
-            .onReceive(
-                NotificationCenter.default
-                    .publisher(for: UIDevice.orientationDidChangeNotification)
-                    .delay(for: .milliseconds(1), scheduler: RunLoop.main)
-                    .map { _ in UIApplication.shared.keyWindowInsets() }
-                    .removeDuplicates()
-            ) { newInsets in
-                safeAreaInsets = newInsets
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -105,7 +94,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 title: title,
                 backgroundStyle: barStyle,
                 config: config,
-                safeAreaInsetTop: safeAreaInsets.top,
+                safeAreaInsets: insetsDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
                 isRefreshable: onRefresh != nil,
@@ -116,7 +105,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 trailingBarItem: trailingBarItem
             )
         }
-        .ignoresSafeArea(.container, edges: .top)
+        .ignoresSafeArea(.container, edges: [.top, .horizontal])
     }
 
     var extraHeightToCover: CGFloat {
