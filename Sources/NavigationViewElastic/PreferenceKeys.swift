@@ -26,6 +26,9 @@ struct TitleKey: PreferenceKey {
 // MARK: - Display mode
 public extension NVE {
     enum TitleDisplayMode {
+        /// Title of the ``NavigationViewElastic`` in portrait orientation will be shown
+        /// as a large text, and in landscape orientation as a small text.
+        case auto
         /// Title of the ``NavigationViewElastic`` initially will be shown as a large text.
         case large
         /// Title of the ``NavigationViewElastic`` will be shown as a small text.
@@ -35,8 +38,8 @@ public extension NVE {
 
 public extension View {
     /// Set the title display mode on the parent ``NavigationElasticView``.
-    func nveTitleDisplayMode(_ mode: NVE.TitleDisplayMode? = .large) -> some View {
-        preference(key: TitleDisplayModeKey.self, value: mode ?? .large)
+    func nveTitleDisplayMode(_ mode: NVE.TitleDisplayMode? = .auto) -> some View {
+        preference(key: TitleDisplayModeKey.self, value: mode ?? .auto)
     }
 }
 

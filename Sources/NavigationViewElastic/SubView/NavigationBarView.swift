@@ -10,6 +10,7 @@ import SwiftUI
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
     let titleDisplayMode: NVE.TitleDisplayMode
+    let isLandscape: Bool
     let backgroundStyle: AnyShapeStyle
     let config: NavigationViewConfig
     let safeAreaInsets: EdgeInsets
@@ -146,6 +147,10 @@ private extension NavigationBarView {
 
     var largeTitleOpacity: CGFloat {
         switch titleDisplayMode {
+        case .auto:
+            isReadyToCollapse
+                ? 0
+                : (isLandscape ? 0 : 1)
         case .large: isReadyToCollapse ? 0 : 1
         case .inline: 0
         }

@@ -47,7 +47,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     }
 
     @State private var title: String?
-    @State private var titleDisplayMode: NVE.TitleDisplayMode = .large
+    @State private var titleDisplayMode: NVE.TitleDisplayMode = .auto
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
@@ -56,6 +56,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     @State private var isLockedForRefresh: Bool = false
 
     @StateObject private var insetsDetector = SafeAreaInsetsDetector()
+    @StateObject private var orientationDetector = OrientationDetector(
+        filter: [.portrait, .landscapeLeft, .landscapeRight]
+    )
 
     public var body: some View {
         ZStack(alignment: .top) {
@@ -94,6 +97,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             NavigationBarView(
                 title: title,
                 titleDisplayMode: titleDisplayMode,
+                isLandscape: orientationDetector.orientation.isLandscape,
                 backgroundStyle: barStyle,
                 config: config,
                 safeAreaInsets: insetsDetector.insets,
@@ -114,8 +118,14 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         guard title != nil else { return 0 }
 
         return switch titleDisplayMode {
-        case .large: config.largeTitle.topPadding + config.largeTitle.supposedHeight
-        case .inline: 0
+        case .auto:
+            orientationDetector.orientation.isLandscape
+                ? 0
+                : config.largeTitle.topPadding + config.largeTitle.supposedHeight
+        case .large:
+            config.largeTitle.topPadding + config.largeTitle.supposedHeight
+        case .inline:
+            0
         }
     }
 }
