@@ -145,3 +145,9 @@ private struct TitleKey: PreferenceKey {
         value = value ?? nextValue()
     }
 }
+
+#if DEBUG
+#Preview {
+    ProxyView()
+}
+#endif

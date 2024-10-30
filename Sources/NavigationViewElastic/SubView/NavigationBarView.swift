@@ -201,3 +201,9 @@ private extension NavigationBarView {
         )
     }
 }
+
+#if DEBUG
+#Preview {
+    ProxyView()
+}
+#endif
