@@ -18,7 +18,7 @@ public enum NVE { }
 ///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     private var barStyle: AnyShapeStyle
-    let config: NavigationViewConfig
+    let config: NVE.Config
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
@@ -28,7 +28,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
     public init(
         barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
-        config: NavigationViewConfig = .default,
+        config: NVE.Config = .default,
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
         @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
@@ -75,7 +75,10 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 guard onRefresh != nil else { return }
                 if isLockedForRefresh && scrollOffset.y >= 0 { isLockedForRefresh = false }
 
-                if scrollOffset.isScrolledDown(config.progress.triggeringOffset) && !isLockedForRefresh {
+                let triggeringOffset = config.progressFor(orientationDetector.orientation.isLandscape).triggeringOffset
+
+                if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh
+                {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     }

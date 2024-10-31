@@ -1,5 +1,5 @@
 //
-//  NavigationViewConfig.swift
+//  Config.swift
 //  
 //
 //  Created by Илья Аникин on 20.09.2023.
@@ -8,26 +8,38 @@
 import Foundation
 
 // MARK: - Config
-public struct NavigationViewConfig {
-    let largeTitle: LargeTitleConfig
-    let progress: ProgressConfig
+public extension NVE {
+    struct Config {
+        /// Parameters for large title layer.
+        let largeTitle: LargeTitle
+        /// Parameters for refresh progress indication in portrait orientation.
+        let progressPortrait: Progress
+        /// Parameters for refresh progress indication in landscape orientation.
+        let progressLandscape: Progress
 
-    public init(
-        largeTitleConfig: LargeTitleConfig = .init(),
-        progress: ProgressConfig = .init()
-    ) {
-        self.largeTitle = largeTitleConfig
-        self.progress = progress
+        public init(
+            largeTitleConfig: LargeTitle = .default,
+            progressPortrait: Progress = .portrait,
+            progressLandscape: Progress = .landscape
+        ) {
+            self.largeTitle = largeTitleConfig
+            self.progressPortrait = progressPortrait
+            self.progressLandscape = progressLandscape
+        }
+
+        public static var `default` = Self()
+
+        public func progressFor(_ isLandscape: Bool) -> Progress {
+            isLandscape ? progressLandscape : progressPortrait
+        }
     }
-
-    public static var `default` = Self()
 }
 
-public extension NavigationViewConfig {
+public extension NVE.Config {
     /// Bar configuration scheme:
     /// -------------
     /// ```
-    ///                      safe area top edge
+    ///                    safe area top edge
     /// |--------------------------------------------------------|
     /// |                    [topEdgeInset]                      |
     /// |--------------------------------------------------------|
@@ -43,7 +55,7 @@ public extension NavigationViewConfig {
     /// |--------------------------------------------------------|
     /// ```
     ///
-    struct LargeTitleConfig {
+    struct LargeTitle {
         /// Approximated large title text height
         let supposedHeight: CGFloat
         /// Padding from safe area top edge to top edge of small title block.
@@ -68,20 +80,32 @@ public extension NavigationViewConfig {
             self.bottomPadding = bottomPadding
             self.backgroundOpacityThreshold = backgroundOpacityThreshold
         }
+
+        public static let `default` = Self()
     }
 
-    struct ProgressConfig {
+    struct Progress {
         let startRevealOffset: CGFloat
         let revealedOffset: CGFloat
         let triggeringOffset: CGFloat
 
         public init(
-            startRevealOffset: CGFloat = 30,
-            revealedOffset: CGFloat = 110
+            startRevealOffset: CGFloat,
+            revealedOffset: CGFloat,
+            triggerThreshold: CGFloat
         ) {
-            self.startRevealOffset = startRevealOffset
-            self.revealedOffset = revealedOffset
-            self.triggeringOffset = revealedOffset + 15
+            if startRevealOffset >= revealedOffset {
+                self.startRevealOffset = Self.portrait.startRevealOffset
+                self.revealedOffset = Self.portrait.revealedOffset
+            } else {
+                self.startRevealOffset = startRevealOffset
+                self.revealedOffset = revealedOffset
+            }
+
+            self.triggeringOffset = revealedOffset + triggerThreshold
         }
+
+        public static let portrait = Self(startRevealOffset: 30, revealedOffset: 110, triggerThreshold: 15)
+        public static let landscape = Self(startRevealOffset: 20, revealedOffset: 60, triggerThreshold: 5)
     }
 }

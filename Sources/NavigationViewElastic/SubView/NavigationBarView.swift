@@ -12,7 +12,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     let titleDisplayMode: NVE.TitleDisplayMode
     let isLandscape: Bool
     let backgroundStyle: AnyShapeStyle
-    let config: NavigationViewConfig
+    let config: NVE.Config
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
@@ -45,8 +45,8 @@ private extension NavigationBarView {
                 ProgressIndicator(
                     offset: scrollOffset,
                     isAnimating: isRefreshing,
-                    startRevealOffset: config.progress.startRevealOffset,
-                    revealedOffset: config.progress.revealedOffset,
+                    startRevealOffset: config.progressFor(isLandscape).startRevealOffset,
+                    revealedOffset: config.progressFor(isLandscape).revealedOffset,
                     isShowingLocked: isRefreshing
                 )
                 .scaleEffect(0.8)
