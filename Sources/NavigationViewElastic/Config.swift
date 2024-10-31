@@ -12,18 +12,18 @@ import SwiftUI
 public extension NVE {
     struct Config {
         /// Parameters for large title layer.
-        var largeTitle: LargeTitle
+        public var largeTitle: LargeTitle
         /// Parameters for refresh progress indication in portrait orientation.
-        var progressPortrait: Progress
+        public var progressPortrait: Progress
         /// Parameters for refresh progress indication in landscape orientation.
-        var progressLandscape: Progress
+        public var progressLandscape: Progress
         /// Style of bar in collapsed state
-        var barCollapsedStyle: AnyShapeStyle
+        public var barCollapsedStyle: AnyShapeStyle
         /// A threshold determines how to change bar's background opacity when it is collapsing.
-        var barOpacityThreshold: CGFloat
+        public var barOpacityThreshold: CGFloat
         /// Collection of safe area edges to be ignored by the content
         /// within scrollable area.
-        var contentIgnoresSafeAreaEdges: Edge.Set
+        public var contentIgnoresSafeAreaEdges: Edge.Set
 
         public init(
             largeTitleConfig: LargeTitle = .default,
@@ -71,13 +71,13 @@ public extension NVE.Config {
     ///
     struct LargeTitle {
         /// Approximated large title text height
-        var supposedHeight: CGFloat
+        public var supposedHeight: CGFloat
         /// Padding from safe area top edge to top edge of small title block.
-        var topEdgeInset: CGFloat
+        public var topEdgeInset: CGFloat
         /// Padding from top edge of large title block to title text itself.
-        var topPadding: CGFloat
+        public var topPadding: CGFloat
         /// Padding from bottom edge of large title block to subtitle content.
-        var bottomPadding: CGFloat
+        public var bottomPadding: CGFloat
 
         public init(
             supposedHeight: CGFloat = 40,
@@ -96,11 +96,11 @@ public extension NVE.Config {
 
     struct Progress {
         /// Scroll offset when progress indicator begins to appear.
-        var startRevealOffset: CGFloat
+        public var startRevealOffset: CGFloat
         /// Scroll offset when progress indicator is fully appeared.
-        var revealedOffset: CGFloat
+        public var revealedOffset: CGFloat
         /// Scroll offset when refreshable action should be triggered.
-        var triggeringOffset: CGFloat
+        public var triggeringOffset: CGFloat
 
         public init(
             startRevealOffset: CGFloat,
