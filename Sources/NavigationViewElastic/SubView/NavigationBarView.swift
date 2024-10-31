@@ -12,7 +12,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     let titleDisplayMode: NVE.TitleDisplayMode
     let isLandscape: Bool
     let backgroundStyle: AnyShapeStyle
-    let config: NVE.Config
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
@@ -22,6 +21,8 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
+
+    @Environment(\.nveConfig) var config
 
     var body: some View {
         ZStack(alignment: .top) {

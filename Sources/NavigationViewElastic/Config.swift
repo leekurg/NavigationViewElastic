@@ -11,11 +11,11 @@ import Foundation
 public extension NVE {
     struct Config {
         /// Parameters for large title layer.
-        let largeTitle: LargeTitle
+        var largeTitle: LargeTitle
         /// Parameters for refresh progress indication in portrait orientation.
-        let progressPortrait: Progress
+        var progressPortrait: Progress
         /// Parameters for refresh progress indication in landscape orientation.
-        let progressLandscape: Progress
+        var progressLandscape: Progress
 
         public init(
             largeTitleConfig: LargeTitle = .default,
@@ -57,15 +57,15 @@ public extension NVE.Config {
     ///
     struct LargeTitle {
         /// Approximated large title text height
-        let supposedHeight: CGFloat
+        var supposedHeight: CGFloat
         /// Padding from safe area top edge to top edge of small title block.
-        let topEdgeInset: CGFloat
+        var topEdgeInset: CGFloat
         /// Padding from top edge of large title block to title text itself.
-        let topPadding: CGFloat
+        var topPadding: CGFloat
         /// Padding from bottom edge of large title block to subtitle content.
-        let bottomPadding: CGFloat
+        var bottomPadding: CGFloat
         /// A threshold determines how to change bar's background opacity when it is collapsing.
-        let backgroundOpacityThreshold: CGFloat
+        var backgroundOpacityThreshold: CGFloat
 
         public init(
             supposedHeight: CGFloat = 40,
@@ -85,9 +85,12 @@ public extension NVE.Config {
     }
 
     struct Progress {
-        let startRevealOffset: CGFloat
-        let revealedOffset: CGFloat
-        let triggeringOffset: CGFloat
+        /// Scroll offset when progress indicator begins to appear.
+        var startRevealOffset: CGFloat
+        /// Scroll offset when progress indicator is fully appeared.
+        var revealedOffset: CGFloat
+        /// Scroll offset when refreshable action should be triggered.
+        var triggeringOffset: CGFloat
 
         public init(
             startRevealOffset: CGFloat,

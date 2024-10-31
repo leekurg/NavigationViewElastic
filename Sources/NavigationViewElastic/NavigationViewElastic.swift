@@ -18,7 +18,6 @@ public enum NVE { }
 ///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     private var barStyle: AnyShapeStyle
-    let config: NVE.Config
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
@@ -28,7 +27,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
     public init(
         barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
-        config: NVE.Config = .default,
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
         @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
@@ -37,7 +35,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         onRefresh: (() -> Void)? = nil
     ) {
         self.barStyle = barStyle
-        self.config = config
         self.content = content
         self.subtitleContent = subtitleContent
         self.leadingBarItem = leadingBarItem
@@ -45,6 +42,13 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         self.stopRefreshing = stopRefreshing
         self.onRefresh = onRefresh
     }
+
+    @Environment(\.nveConfig) var config
+
+    @StateObject private var insetsDetector = SafeAreaInsetsDetector()
+    @StateObject private var orientationDetector = OrientationDetector(
+        filter: [.portrait, .landscapeLeft, .landscapeRight]
+    )
 
     @State private var title: String?
     @State private var titleDisplayMode: NVE.TitleDisplayMode = .auto
@@ -54,11 +58,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     /// Determines that swipe down gesture is released and component is
     /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
     @State private var isLockedForRefresh: Bool = false
-
-    @StateObject private var insetsDetector = SafeAreaInsetsDetector()
-    @StateObject private var orientationDetector = OrientationDetector(
-        filter: [.portrait, .landscapeLeft, .landscapeRight]
-    )
 
     public var body: some View {
         ZStack(alignment: .top) {
@@ -102,7 +101,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 titleDisplayMode: titleDisplayMode,
                 isLandscape: orientationDetector.orientation.isLandscape,
                 backgroundStyle: barStyle,
-                config: config,
                 safeAreaInsets: insetsDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
