@@ -11,7 +11,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
     let titleDisplayMode: NVE.TitleDisplayMode
     let isLandscape: Bool
-    let backgroundStyle: AnyShapeStyle
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
@@ -23,6 +22,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @ViewBuilder let trailingBarItem: () -> T
 
     @Environment(\.nveConfig) var config
+    @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -89,7 +89,7 @@ private extension NavigationBarView {
             }
         }
         .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
-        .background(backgroundStyle.opacity(barBackgroundOpacity))
+        .background(barStyle.opacity(barBackgroundOpacity))
         .padding(safeAreaInsets.ignoring(.vertical))
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
@@ -158,7 +158,7 @@ private extension NavigationBarView {
     }
 
     var largeTitleBackground: AnyShapeStyle {
-        isIntersectionWithContent ? backgroundStyle : AnyShapeStyle(.clear)
+        isIntersectionWithContent ? barStyle : AnyShapeStyle(.clear)
     }
 
     var largeTitleScale: CGFloat {
@@ -203,7 +203,7 @@ private extension NavigationBarView {
         if !isIntersectionWithContent { return 0 }
 
         return clamp(
-            abs(scrollOffset - extraHeightToCover) / config.largeTitle.backgroundOpacityThreshold,
+            abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
             min: 0,
             max: 1
         )

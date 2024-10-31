@@ -17,7 +17,6 @@ public enum NVE { }
 /// It happens in underlying `ScrollView` when it's content changed to other view with different height.
 ///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
-    private var barStyle: AnyShapeStyle
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
@@ -26,7 +25,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     private var onRefresh: (() -> Void)?
 
     public init(
-        barStyle: AnyShapeStyle = AnyShapeStyle(.bar),
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
         @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
@@ -34,7 +32,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
-        self.barStyle = barStyle
         self.content = content
         self.subtitleContent = subtitleContent
         self.leadingBarItem = leadingBarItem
@@ -67,6 +64,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, navigationViewSize.height + extraHeightToCover + insetsDetector.insets.top)
+                .padding(insetsDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
                 .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
             }
@@ -100,7 +98,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 title: title,
                 titleDisplayMode: titleDisplayMode,
                 isLandscape: orientationDetector.orientation.isLandscape,
-                backgroundStyle: barStyle,
                 safeAreaInsets: insetsDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
@@ -137,12 +134,6 @@ public extension NavigationViewElastic {
         with(self) { copy in
             copy.stopRefreshing = stopRefreshing
             copy.onRefresh = onRefresh
-        }
-    }
-
-    func barStyle<Bar: ShapeStyle>(_ style: Bar) -> Self {
-        with(self) { copy in
-            copy.barStyle = AnyShapeStyle(style)
         }
     }
 }

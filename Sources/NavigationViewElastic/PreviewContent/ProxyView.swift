@@ -59,14 +59,10 @@ struct ProxyView: View {
             }
         )
         .refreshable(stopRefreshing: $stopRefreshing, onRefresh: {})
-        .barStyle(.bar)
         .preferredColorScheme(.dark)
         .background(Color(white: 0.12))
         .nveConfig { config in
-            config.largeTitle.topEdgeInset = 10
-            config.progressPortrait.startRevealOffset = 5
-            config.progressPortrait.revealedOffset = 40
-            config.progressPortrait.triggeringOffset = 45
+            config.largeTitle.topEdgeInset = 20
         }
     }
 }

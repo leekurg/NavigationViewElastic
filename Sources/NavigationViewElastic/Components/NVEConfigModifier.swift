@@ -16,6 +16,16 @@ public extension View {
     @ViewBuilder func nveConfig(_ mutation: @escaping (inout NVE.Config) -> Void) -> some View {
         modifier(NVEConfigModifier(mutation))
     }
+
+    /// Set a bar's background style for ``NavigationViewElastic``.
+    ///
+    /// Changes will be applied to all ``NavigationViewElastic`` views
+    /// down the view hierarchy.
+    func nveBarStyle<S: ShapeStyle>(_ style: S) -> some View {
+        nveConfig { config in
+            config.barCollapsedStyle = AnyShapeStyle(style)
+        }
+    }
 }
 
 struct NVEConfigModifier: ViewModifier {

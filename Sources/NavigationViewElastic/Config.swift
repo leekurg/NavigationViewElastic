@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 // MARK: - Config
 public extension NVE {
@@ -16,15 +17,28 @@ public extension NVE {
         var progressPortrait: Progress
         /// Parameters for refresh progress indication in landscape orientation.
         var progressLandscape: Progress
+        /// Style of bar in collapsed state
+        var barCollapsedStyle: AnyShapeStyle
+        /// A threshold determines how to change bar's background opacity when it is collapsing.
+        var barOpacityThreshold: CGFloat
+        /// Collection of safe area edges to be ignored by the content
+        /// within scrollable area.
+        var contentIgnoresSafeAreaEdges: Edge.Set
 
         public init(
             largeTitleConfig: LargeTitle = .default,
             progressPortrait: Progress = .portrait,
-            progressLandscape: Progress = .landscape
+            progressLandscape: Progress = .landscape,
+            barCollapsedStyle: AnyShapeStyle = AnyShapeStyle(.bar),
+            barOpacityThreshold: CGFloat = 10,
+            contentIgnoresSafeAreaEdges: Edge.Set = []
         ) {
             self.largeTitle = largeTitleConfig
             self.progressPortrait = progressPortrait
             self.progressLandscape = progressLandscape
+            self.barCollapsedStyle = barCollapsedStyle
+            self.barOpacityThreshold = barOpacityThreshold
+            self.contentIgnoresSafeAreaEdges = contentIgnoresSafeAreaEdges
         }
 
         public static var `default` = Self()
@@ -64,21 +78,17 @@ public extension NVE.Config {
         var topPadding: CGFloat
         /// Padding from bottom edge of large title block to subtitle content.
         var bottomPadding: CGFloat
-        /// A threshold determines how to change bar's background opacity when it is collapsing.
-        var backgroundOpacityThreshold: CGFloat
 
         public init(
             supposedHeight: CGFloat = 40,
             topEdgeInset: CGFloat = 0,
             topPadding: CGFloat = 15,
-            bottomPadding: CGFloat = 5,
-            backgroundOpacityThreshold: CGFloat = 10
+            bottomPadding: CGFloat = 5
         ) {
             self.supposedHeight = supposedHeight
             self.topEdgeInset = topEdgeInset
             self.topPadding = topPadding
             self.bottomPadding = bottomPadding
-            self.backgroundOpacityThreshold = backgroundOpacityThreshold
         }
 
         public static let `default` = Self()
