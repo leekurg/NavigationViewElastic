@@ -44,7 +44,7 @@ public extension View {
 }
 
 struct TitleDisplayModeKey: PreferenceKey {
-    static var defaultValue: NVE.TitleDisplayMode = .large
+    static var defaultValue: NVE.TitleDisplayMode = .auto
 
     static func reduce(value: inout NVE.TitleDisplayMode, nextValue: () -> NVE.TitleDisplayMode) {
         value = nextValue()

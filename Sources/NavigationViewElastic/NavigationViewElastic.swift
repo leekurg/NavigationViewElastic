@@ -113,7 +113,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     }
 
     var extraHeightToCover: CGFloat {
-        guard title != nil else { return 0 }
+        if title == nil { return 0 }
 
         return switch titleDisplayMode {
         case .auto:

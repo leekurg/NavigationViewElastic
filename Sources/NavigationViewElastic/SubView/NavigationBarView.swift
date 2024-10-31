@@ -67,22 +67,25 @@ private extension NavigationBarView {
     // MARK: - large title
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
-            Text(title ?? " ")
-                .lineLimit(1)
-                .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
-                .scaleEffect(largeTitleScale, anchor: .bottomLeading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .opacity(largeTitleOpacity)
-                .padding(
-                    .init(
-                        top: config.largeTitle.topEdgeInset,
-                        leading: 20,
-                        bottom: config.largeTitle.bottomPadding,
-                        trailing: 10
+            Group {
+                Text(title ?? " ")
+                    .lineLimit(1)
+                    .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .opacity(largeTitleOpacity)
+                    .padding(
+                        .init(
+                            top: config.largeTitle.topEdgeInset,
+                            leading: 20,
+                            bottom: config.largeTitle.bottomPadding,
+                            trailing: 10
+                        )
                     )
-                )
-
-            subtitleContent()
+                
+                subtitleContent()
+            }
+            .padding(safeAreaInsets.ignoring(.vertical))
 
             if isIntersectionWithContent {
                 Divider().opacity(barBackgroundOpacity)
@@ -90,7 +93,6 @@ private extension NavigationBarView {
         }
         .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
         .background(barStyle.opacity(barBackgroundOpacity))
-        .padding(safeAreaInsets.ignoring(.vertical))
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
         .reverseMask(alignment: .top) {
@@ -143,7 +145,15 @@ private extension NavigationBarView {
 // MARK: - Computed props
 private extension NavigationBarView {
     var smallTitleOpacity: CGFloat {
-        isReadyToCollapse ? 1 : 0
+        if isRefreshable {
+            return isReadyToCollapse ? 1 : 0
+        }
+
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !isLandscape)  {
+            return isReadyToCollapse ? 1 : 0
+        }
+
+        return 1
     }
 
     var largeTitleOpacity: CGFloat {
