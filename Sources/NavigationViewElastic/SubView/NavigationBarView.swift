@@ -24,6 +24,8 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
+    @State private var smallTitleSize: CGSize = .zero
+
     var body: some View {
         ZStack(alignment: .top) {
             largeTitleLayer
@@ -32,8 +34,20 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                 .padding(safeAreaInsets.ignoring(.bottom))
 
             progressView
-                .padding(.top, safeAreaInsets.top + config.largeTitle.topEdgeInset + 5)
+                .padding(.top, safeAreaInsets.top + config.largeTitle.topEdgeInset/* + 5*/)
         }
+//        .overlay(alignment: .bottom) {
+//            VStack {
+//                HStack {
+//                    Text("scroll: \(scrollOffset, specifier: "%.1f")")
+//                    Text("factor: \(scrollFactor, specifier: "%.1f")")
+//                }
+//                Text("isReadyToCollapse: \(isReadyToCollapse)")
+//                Text("isIntersectionWithContent: \(isIntersectionWithContent)")
+//            }
+//            .padding()
+//            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+//        }
     }
 }
 
@@ -100,9 +114,8 @@ private extension NavigationBarView {
                 Rectangle()
                     .frame(
                         height: safeAreaInsets.top
+                            + smallTitleSize.height
                             + config.largeTitle.topEdgeInset
-                            + config.largeTitle.supposedHeight
-                            + config.largeTitle.bottomPadding
                     )
             }
         }
@@ -132,13 +145,7 @@ private extension NavigationBarView {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.bottom, 7)
-        .frame(
-            height: config.largeTitle.topEdgeInset +
-            config.largeTitle.supposedHeight +
-            config.largeTitle.bottomPadding,
-            alignment: .bottom
-        )
+        .backgroundSizeReader(size: $smallTitleSize)
     }
 }
 
@@ -146,11 +153,11 @@ private extension NavigationBarView {
 private extension NavigationBarView {
     var smallTitleOpacity: CGFloat {
         if isRefreshable {
-            return isReadyToCollapse ? 1 : 0
+            return isIntersectionWithContent ? 1 : 0
         }
 
         if titleDisplayMode == .large || (titleDisplayMode == .auto && !isLandscape)  {
-            return isReadyToCollapse ? 1 : 0
+            return isIntersectionWithContent ? 1 : 0
         }
 
         return 1
@@ -159,10 +166,10 @@ private extension NavigationBarView {
     var largeTitleOpacity: CGFloat {
         switch titleDisplayMode {
         case .auto:
-            isReadyToCollapse
+            isIntersectionWithContent
                 ? 0
                 : (isLandscape ? 0 : 1)
-        case .large: isReadyToCollapse ? 0 : 1
+        case .large: isIntersectionWithContent ? 0 : 1
         case .inline: 0
         }
     }
@@ -223,5 +230,9 @@ private extension NavigationBarView {
 #if DEBUG
 #Preview {
     ProxyView()
+        .nveConfig { config in
+//            config.largeTitle.topPadding = 20
+//            config.largeTitle.bottomPadding = 20
+        }
 }
 #endif
