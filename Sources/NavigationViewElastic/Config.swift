@@ -82,7 +82,7 @@ public extension NVE.Config {
         public init(
             supposedHeight: CGFloat = 40,
             topEdgeInset: CGFloat = 0,
-            topPadding: CGFloat = 15,
+            topPadding: CGFloat = 0,
             bottomPadding: CGFloat = 5
         ) {
             self.supposedHeight = supposedHeight

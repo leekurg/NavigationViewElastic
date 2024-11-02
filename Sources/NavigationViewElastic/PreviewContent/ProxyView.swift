@@ -28,7 +28,6 @@ struct ProxyView: View {
                     }
                 }
                 .nveTitle("Title")
-                .nveTitleDisplayMode(.inline)
                 .padding(.horizontal, 10)
             },
             subtitleContent: {
@@ -61,9 +60,9 @@ struct ProxyView: View {
         .refreshable(stopRefreshing: $stopRefreshing, onRefresh: {})
         .preferredColorScheme(.dark)
         .background(Color(white: 0.12))
-        .nveConfig { config in
-            config.largeTitle.topEdgeInset = 20
-        }
+//        .nveConfig { config in
+//            config.largeTitle.topEdgeInset = 20
+//        }
     }
 }
 
