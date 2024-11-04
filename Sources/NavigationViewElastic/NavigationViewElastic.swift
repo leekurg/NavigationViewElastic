@@ -63,7 +63,13 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     content()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, navigationViewSize.height + extraHeightToCover + insetsDetector.insets.top)
+                .padding(
+                    .top,
+                    navigationViewSize.height
+                    + extraHeightToCover
+                    + insetsDetector.insets.top
+                    + config.smallTitle.topPadding(for: orientationDetector.orientation)
+                )
                 .padding(insetsDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
                 .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
@@ -72,7 +78,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 guard onRefresh != nil else { return }
                 if isLockedForRefresh && scrollOffset.y >= 0 { isLockedForRefresh = false }
 
-                let triggeringOffset = config.progressFor(orientationDetector.orientation.isLandscape).triggeringOffset
+                let triggeringOffset = config.progress(for: orientationDetector.orientation).triggeringOffset
 
                 if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh
                 {
@@ -97,7 +103,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             NavigationBarView(
                 title: title,
                 titleDisplayMode: titleDisplayMode,
-                isLandscape: orientationDetector.orientation.isLandscape,
+                orientation: orientationDetector.orientation,
                 safeAreaInsets: insetsDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,

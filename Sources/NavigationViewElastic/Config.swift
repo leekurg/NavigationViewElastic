@@ -13,6 +13,8 @@ public extension NVE {
     struct Config {
         /// Parameters for large title layer.
         public var largeTitle: LargeTitle
+        /// Parameters for small title layer.
+        public var smallTitle: SmallTitle
         /// Parameters for refresh progress indication in portrait orientation.
         public var progressPortrait: Progress
         /// Parameters for refresh progress indication in landscape orientation.
@@ -27,6 +29,7 @@ public extension NVE {
 
         public init(
             largeTitleConfig: LargeTitle = .default,
+            smallTitleConfig: SmallTitle = .default,
             progressPortrait: Progress = .portrait,
             progressLandscape: Progress = .landscape,
             barCollapsedStyle: AnyShapeStyle = AnyShapeStyle(.bar),
@@ -34,6 +37,7 @@ public extension NVE {
             contentIgnoresSafeAreaEdges: Edge.Set = []
         ) {
             self.largeTitle = largeTitleConfig
+            self.smallTitle = smallTitleConfig
             self.progressPortrait = progressPortrait
             self.progressLandscape = progressLandscape
             self.barCollapsedStyle = barCollapsedStyle
@@ -43,8 +47,12 @@ public extension NVE {
 
         public static var `default` = Self()
 
-        public func progressFor(_ isLandscape: Bool) -> Progress {
-            isLandscape ? progressLandscape : progressPortrait
+        func progress(for orientation: UIDeviceOrientation) -> Progress {
+            switch orientation {
+            case .portrait: return progressPortrait
+            case .landscapeLeft, .landscapeRight: return progressLandscape
+            default: return .portrait
+            }
         }
     }
 }
@@ -55,7 +63,7 @@ public extension NVE.Config {
     /// ```
     ///                    safe area top edge
     /// |--------------------------------------------------------|
-    /// |                    [topEdgeInset]                      |
+    /// |        [topEdgeInset + smallTitle.topPadding]          |
     /// |--------------------------------------------------------|
     /// | leading item      small title block      trailing item |
     /// |--------------------------------------------------------|
@@ -83,7 +91,7 @@ public extension NVE.Config {
             supposedHeight: CGFloat = 40,
             topEdgeInset: CGFloat = 0,
             topPadding: CGFloat = 0,
-            bottomPadding: CGFloat = 5
+            bottomPadding: CGFloat = 0
         ) {
             self.supposedHeight = supposedHeight
             self.topEdgeInset = topEdgeInset
@@ -91,6 +99,36 @@ public extension NVE.Config {
             self.bottomPadding = bottomPadding
         }
 
+        public static let `default` = Self()
+    }
+    
+    struct SmallTitle {
+        /// Padding from top edge of small title block to title text itself in portrait orientation.
+        public var topPaddingPortrait: CGFloat
+        /// Padding from top edge of small title block to title text itself in portrait orientation.
+        public var topPaddingLandscape: CGFloat
+        /// Padding from bottom edge of small title block.
+        public var bottomPadding: CGFloat
+        
+        public init(
+            topPaddingPortrait: CGFloat = 0,
+            topPaddingLandscape: CGFloat = 7,
+            bottomPadding: CGFloat = 10
+        ) {
+            self.topPaddingPortrait = topPaddingPortrait
+            self.topPaddingLandscape = topPaddingLandscape
+            self.bottomPadding = bottomPadding
+        }
+        
+        /// Returns orientation dependent top padding.
+        func topPadding(for orientation: UIDeviceOrientation) -> CGFloat {
+            switch orientation {
+            case .portrait: topPaddingPortrait
+            case .landscapeLeft, .landscapeRight: topPaddingLandscape
+            default: topPaddingPortrait
+            }
+        }
+        
         public static let `default` = Self()
     }
 

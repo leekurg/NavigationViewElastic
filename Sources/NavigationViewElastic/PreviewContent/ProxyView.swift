@@ -10,6 +10,7 @@ import SwiftUI
 #if DEBUG
 struct ProxyView: View {
     @State var stopRefreshing = false
+    @State var isSubtitle = true
 
     var body: some View {
         NavigationViewElastic(
@@ -31,25 +32,30 @@ struct ProxyView: View {
                 .padding(.horizontal, 10)
             },
             subtitleContent: {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 5) {
-                        ForEach(Product.allCases, id: \.self) { entry in
-                            Button(action: { stopRefreshing = true }) {
-                                Text(entry.rawValue)
-                                    .padding(.vertical, 5)
-                                    .padding(.horizontal, 10)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                if isSubtitle {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 5) {
+                            ForEach(Product.allCases, id: \.self) { entry in
+                                Button(action: { stopRefreshing = true }) {
+                                    Text(entry.rawValue)
+                                        .padding(.vertical, 5)
+                                        .padding(.horizontal, 10)
+                                        .background(Color.gray.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
                             }
                         }
+                        .padding(.horizontal, 10)
                     }
-                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
                 }
-                .padding(.bottom, 10)
             },
             leadingBarItem: { NVE.BackButton() },
             trailingBarItem: {
                 Button {
+                    withAnimation(.spring) {
+                        isSubtitle.toggle()
+                    }
                 } label: {
                     Image(systemName: "heart")
                         .font(.system(size: 20, weight: .bold))

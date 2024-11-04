@@ -10,7 +10,7 @@ import SwiftUI
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
     let titleDisplayMode: NVE.TitleDisplayMode
-    let isLandscape: Bool
+    let orientation: UIDeviceOrientation
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
@@ -34,7 +34,12 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                 .padding(safeAreaInsets.ignoring(.bottom))
 
             progressView
-                .padding(.top, safeAreaInsets.top + config.largeTitle.topEdgeInset/* + 5*/)
+                .padding(
+                    .top,
+                    safeAreaInsets.top
+                    + config.largeTitle.topEdgeInset
+                    + config.smallTitle.topPadding(for: orientation)
+                )
         }
 //        .overlay(alignment: .bottom) {
 //            VStack {
@@ -60,8 +65,8 @@ private extension NavigationBarView {
                 ProgressIndicator(
                     offset: scrollOffset,
                     isAnimating: isRefreshing,
-                    startRevealOffset: config.progressFor(isLandscape).startRevealOffset,
-                    revealedOffset: config.progressFor(isLandscape).revealedOffset,
+                    startRevealOffset: config.progress(for: orientation).startRevealOffset,
+                    revealedOffset: config.progress(for: orientation).revealedOffset,
                     isShowingLocked: isRefreshing
                 )
                 .scaleEffect(0.8)
@@ -106,6 +111,7 @@ private extension NavigationBarView {
             }
         }
         .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
+        .padding(.top, config.smallTitle.topPadding(for: orientation))
         .background(barStyle.opacity(barBackgroundOpacity))
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
@@ -116,6 +122,8 @@ private extension NavigationBarView {
                         height: safeAreaInsets.top
                             + smallTitleSize.height
                             + config.largeTitle.topEdgeInset
+                            + config.smallTitle.bottomPadding
+                            + config.smallTitle.topPadding(for: orientation)
                     )
             }
         }
@@ -146,6 +154,7 @@ private extension NavigationBarView {
         }
         .frame(maxWidth: .infinity)
         .backgroundSizeReader(size: $smallTitleSize)
+        .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
 
@@ -153,11 +162,11 @@ private extension NavigationBarView {
 private extension NavigationBarView {
     var smallTitleOpacity: CGFloat {
         if isRefreshable {
-            return isIntersectionWithContent ? 1 : 0
+            return isReadyToCollapse ? 1 : 0
         }
 
-        if titleDisplayMode == .large || (titleDisplayMode == .auto && !isLandscape)  {
-            return isIntersectionWithContent ? 1 : 0
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+            return isReadyToCollapse ? 1 : 0
         }
 
         return 1
@@ -166,10 +175,10 @@ private extension NavigationBarView {
     var largeTitleOpacity: CGFloat {
         switch titleDisplayMode {
         case .auto:
-            isIntersectionWithContent
+            isReadyToCollapse
                 ? 0
-                : (isLandscape ? 0 : 1)
-        case .large: isIntersectionWithContent ? 0 : 1
+                : (orientation.isLandscape ? 0 : 1)
+        case .large: isReadyToCollapse ? 0 : 1
         case .inline: 0
         }
     }
@@ -213,7 +222,9 @@ private extension NavigationBarView {
     }
 
     var isReadyToCollapse: Bool {
-        scrollFactor <= config.largeTitle.topPadding + safeAreaInsets.top
+        scrollFactor <= config.largeTitle.topPadding
+            + safeAreaInsets.top
+            + config.smallTitle.bottomPadding
     }
 
     var barBackgroundOpacity: CGFloat {
