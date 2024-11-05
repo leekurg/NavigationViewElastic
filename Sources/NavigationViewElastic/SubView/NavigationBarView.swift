@@ -106,11 +106,9 @@ private extension NavigationBarView {
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
-            if isIntersectionWithContent {
-                Divider().opacity(barBackgroundOpacity)
-            }
+            Divider().opacity(barBackgroundOpacity)
         }
-        .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
+        .backgroundSizeReader(size: largeTitleLayerSize)
         .padding(.top, config.smallTitle.topPadding(for: orientation))
         .background(barStyle.opacity(barBackgroundOpacity))
         .offset(y: scrollFactor)
