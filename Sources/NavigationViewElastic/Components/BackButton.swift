@@ -24,9 +24,9 @@ public extension NVE {
 
         public var body: some View {
             Button(action: onTap) {
-                HStack(spacing: 5) {
+                HStack(spacing: 6) {
                     Image(systemName: layoutDirection == .leftToRight ? "chevron.left" : "chevron.right")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 22, weight: .medium))
 
                     Text(titleKey ?? "Back")
                 }
@@ -52,7 +52,7 @@ public extension NVE.BackButton {
 
         var insets: EdgeInsets {
             switch self {
-            case .nve: .init(top: 5, leading: 12, bottom: 5, trailing: 5)
+            case .nve: .init(top: 5, leading: 8, bottom: 5, trailing: 5)
             case .system: .init(top: 5, leading: 0, bottom: 5, trailing: 5)
             case .manual(let insets): insets
             }
