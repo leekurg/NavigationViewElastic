@@ -42,7 +42,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
     @Environment(\.nveConfig) var config
 
-    @StateObject private var insetsDetector = SafeAreaInsetsDetector()
     @StateObject private var orientationDetector = OrientationDetector(
         filter: [.portrait, .landscapeLeft, .landscapeRight]
     )
@@ -67,10 +66,12 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     .top,
                     navigationViewSize.height
                     + extraHeightToCover
-                    + insetsDetector.insets.top
-                    + config.smallTitle.topPadding(for: orientationDetector.orientation)
+                    + orientationDetector.insets.top
+                    + config.smallTitle.topPadding(
+                        for: orientationDetector.interfaceOrientation
+                    )
                 )
-                .padding(insetsDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
+                .padding(orientationDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
                 .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
             }
@@ -78,7 +79,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 guard onRefresh != nil else { return }
                 if isLockedForRefresh && scrollOffset.y >= 0 { isLockedForRefresh = false }
 
-                let triggeringOffset = config.progress(for: orientationDetector.orientation).triggeringOffset
+                let triggeringOffset = config.progress(
+                    for: orientationDetector.interfaceOrientation
+                ).triggeringOffset
 
                 if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh
                 {
@@ -103,8 +106,8 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             NavigationBarView(
                 title: title,
                 titleDisplayMode: titleDisplayMode,
-                orientation: orientationDetector.orientation,
-                safeAreaInsets: insetsDetector.insets,
+                orientation: orientationDetector.interfaceOrientation,
+                safeAreaInsets: orientationDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
                 isRefreshable: onRefresh != nil,
@@ -123,7 +126,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
         return switch titleDisplayMode {
         case .auto:
-            orientationDetector.orientation.isLandscape
+            orientationDetector.interfaceOrientation.isLandscape
                 ? 0
                 : config.largeTitle.topPadding + config.largeTitle.supposedHeight
         case .large:

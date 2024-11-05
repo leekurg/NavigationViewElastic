@@ -8,12 +8,18 @@
 import SwiftUI
 
 extension UIApplication {
-    func keyWindowInsets() -> EdgeInsets {
-        let keyWindow = self.connectedScenes
+    var _keyWindow: UIWindow? {
+        self.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap(\.windows)
             .first { $0.isKeyWindow }
-
-        return keyWindow?.safeAreaInsets.toSwiftUIInsets ?? EdgeInsets()
+    }
+    
+    var keyWindowIntefaceOrientation: UIInterfaceOrientation {
+        self._keyWindow?.windowScene?.interfaceOrientation ?? .portrait
+    }
+    
+    func keyWindowInsets() -> EdgeInsets {
+        self._keyWindow?.safeAreaInsets.toSwiftUIInsets ?? EdgeInsets()
     }
 }

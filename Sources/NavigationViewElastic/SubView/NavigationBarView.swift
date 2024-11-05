@@ -10,7 +10,7 @@ import SwiftUI
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
     let titleDisplayMode: NVE.TitleDisplayMode
-    let orientation: UIDeviceOrientation
+    let orientation: UIInterfaceOrientation
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat

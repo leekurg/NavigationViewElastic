@@ -47,7 +47,7 @@ public extension NVE {
 
         public static var `default` = Self()
 
-        func progress(for orientation: UIDeviceOrientation) -> Progress {
+        func progress(for orientation: UIInterfaceOrientation) -> Progress {
             switch orientation {
             case .portrait: return progressPortrait
             case .landscapeLeft, .landscapeRight: return progressLandscape
@@ -121,7 +121,7 @@ public extension NVE.Config {
         }
         
         /// Returns orientation dependent top padding.
-        func topPadding(for orientation: UIDeviceOrientation) -> CGFloat {
+        func topPadding(for orientation: UIInterfaceOrientation) -> CGFloat {
             switch orientation {
             case .portrait: topPaddingPortrait
             case .landscapeLeft, .landscapeRight: topPaddingLandscape
