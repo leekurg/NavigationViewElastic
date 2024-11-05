@@ -114,7 +114,7 @@ private extension NavigationBarView {
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
         .reverseMask(alignment: .top) {
-            if !isIntersectionWithContent {
+            if !isReadyToCollapse {
                 Rectangle()
                     .frame(
                         height: safeAreaInsets.top
