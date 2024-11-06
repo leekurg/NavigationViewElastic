@@ -25,6 +25,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
     @State private var smallTitleSize: CGSize = .zero
+    @State private var isAppeared = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -40,6 +41,9 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.largeTitle.topEdgeInset
                     + config.smallTitle.topPadding(for: orientation)
                 )
+        }
+        .onAppear {
+            isAppeared = true
         }
 //        .overlay(alignment: .bottom) {
 //            VStack {
@@ -103,12 +107,15 @@ private extension NavigationBarView {
                     )
                 
                 subtitleContent()
+                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
             Divider().opacity(barBackgroundOpacity)
         }
-        .backgroundSizeReader(size: largeTitleLayerSize)
+        .backgroundSizeReader(
+            size: largeTitleLayerSize.animation(isAppeared ? .spring : nil)
+        )
         .padding(.top, config.smallTitle.topPadding(for: orientation))
         .background(barStyle.opacity(barBackgroundOpacity))
         .offset(y: scrollFactor)
