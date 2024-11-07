@@ -26,6 +26,9 @@ public extension NVE {
         /// Collection of safe area edges to be ignored by the content
         /// within scrollable area.
         public var contentIgnoresSafeAreaEdges: Edge.Set
+        /// This animation applied to the internal ``ScrollView`` when **subtitleContent**
+        /// size is changing.
+        public var subtitleSizeChangeAnimation: Animation?
 
         public init(
             largeTitleConfig: LargeTitle = .default,
@@ -34,7 +37,8 @@ public extension NVE {
             progressLandscape: Progress = .landscape,
             barCollapsedStyle: AnyShapeStyle = AnyShapeStyle(.bar),
             barOpacityThreshold: CGFloat = 10,
-            contentIgnoresSafeAreaEdges: Edge.Set = []
+            contentIgnoresSafeAreaEdges: Edge.Set = [],
+            subtitleSizeChangeAnimation: Animation? = .spring
         ) {
             self.largeTitle = largeTitleConfig
             self.smallTitle = smallTitleConfig
@@ -43,6 +47,7 @@ public extension NVE {
             self.barCollapsedStyle = barCollapsedStyle
             self.barOpacityThreshold = barOpacityThreshold
             self.contentIgnoresSafeAreaEdges = contentIgnoresSafeAreaEdges
+            self.subtitleSizeChangeAnimation = subtitleSizeChangeAnimation
         }
 
         public static var `default` = Self()

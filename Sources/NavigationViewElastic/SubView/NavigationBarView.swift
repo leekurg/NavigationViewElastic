@@ -114,7 +114,9 @@ private extension NavigationBarView {
             Divider().opacity(barBackgroundOpacity)
         }
         .backgroundSizeReader(
-            size: largeTitleLayerSize.animation(isAppeared ? .spring : nil)
+            size: largeTitleLayerSize.animation(
+                isAppeared ? config.subtitleSizeChangeAnimation : nil
+            )
         )
         .padding(.top, config.smallTitle.topPadding(for: orientation))
         .background(barStyle.opacity(barBackgroundOpacity))
