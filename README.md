@@ -1,5 +1,5 @@
 # NavigationViewElastic
-`NavigationViewElastic` is a `View` that mimics system `NavigationView` + `ScrollView` to add ability to use custom content under the navigation bar title. Requires  **iOS v15**.
+`NavigationViewElastic` is a SwiftUI `View` that replicates the behavior of navigation bar for the system `NavigationView` combined with `ScrollView`, while adding the capability to use custom content beneath the navigation bar title. Requires **iOS 15** or later.
 
 <table>
     <tbody>
@@ -19,59 +19,78 @@
 </table>
 
 ### What is NavigationViewElastic
-Customize style of navigation bars within your app and even provide new capabitilities to them by adding customizable, resizable and interactive content to navigation bars bottom. All of it with convenient and powerful SwiftUI-styled API, color scheme and orientation support!
+`NavigationViewElastic` is not meant to replace `NavigationStack` or `NavigationView`, nor does it propose alternative navigation flows. Instead, it offers a way to create customizable navigation bars for specific parts of your app where enhanced interactivity and visual appeal are desired. **NVE** adds new functionality by enabling interactive, resizable, and customizable content at the bottom of the navigation bar. This is achieved through a simple, SwiftUI-friendly API, with full support for color schemes and device orientation.
 
 ### Features
-1. Transparent navigation bar similar to system one's behaviour
-2. Apply any background style to navigation bar
-3. Add custom interactive resizable content to navigation bar's bottom
-4. Add custom content as leading or trailing toolbar items
-5. Control bar's title display behaviour with appropriate mode (`large`, `inline` or `auto`)
-6. Full contol of any size, padding and spacing through `Config` handy API 
-7. Supports device's color scheme
-8. Supports device's orientation
-9. Configurable **NVE**'s content and bar items safe areas
-10. Optional *Back button* to use when NVE is nested in navigation hierarchy
-11. Editable configuration struct determines sizes of basic elements
-12. UDF-like API for «*Pull-to-refresh*» - you pass a closure to call after pull-gesture. When work is done, pass a `Bool` to **NavigationViewElastic** to hide progress indicator. When no closure is passed, progress indicator will not appear on pull-gesture.
+1. **Transparent Navigation Bar**: Mimics the behavior of the system navigation bar.
+2. **Custom Background Styles**: Apply any background style to the navigation bar.
+3. **Interactive, Resizable Content**: Add custom content at the bottom of the navigation bar.
+4. **Custom Toolbar Items**: Easily add leading or trailing toolbar items.
+5. **Title Display Control**: Adjust the navigation bar title's display mode (`large`, `inline`, or `auto`).
+6. **Editable Configurationl**: Configure sizes, padding, and spacing using a simple `NVE.Config` API.
+7. **Integration with Vanilla Navigation** Smooth integration with emdedded `NavigationStack`/`NavigationView`
+8. **Color Scheme Support**: Automatically adapts to the device's light or dark mode.
+9. **Orientation Support**: Works seamlessly in both portrait and landscape orientations.
+10. **Safe Area Configuration**: Customize the safe areas for **NavigationViewElastic** content. Bar items respects device's safe area.
+11. **Optional Back Button**: Include a `NVE.BackButton` when **NavigationViewElastic** is nested in a navigation hierarchy.
+13. **Pull-to-Refresh API**: Implement pull-to-refresh functionality using a closure. When the task is complete, provide a `Bool` to hide the progress indicator. If no closure is passed, the progress indicator will not be shown.
 
 ### Usage
 You can use example project located here: [NavigationViewElastic Example](https://github.com/leekurg/NavigationViewElasticExample).
 
-Annotate `SwiftUI` file with «**import NavigationViewElastic**». Then pass to **NavigationViewElastic** a `content` with your main content, `subtitleContent` with additional view for displaying at the bottom of navigation bar. Optionaly, you can use `leadingBarItem` and `trailingBarItem` viewbuilders or modifier-like functions: `.refreshable()` for *Pull-to-refresh* ability, `.navigationTitle()` and `blurStyle()`.
-
-For using **NVE** as nested view inside your navigation hierarchy you can optionally add a *Back button* to navigation toolbar. You can pick a system-like button `NVE.BackButton()`, style it with custom title string, action or foreground color, or make your own view. When using **NVE** as nested navigation view, remember to hide outer `NavigationView` with `.navigationBarHidden(true)`.
 ```
 var body: some View {
-        NavigationViewElastic {
-            VStack {
-                ///...
-            }
-            .nveTitle("Title")
-            .nveTitleDisplayMode(.inline)    // Navigation bar title appears in minimized form
-        } subtitleContent: {
-            Button("Subtitle button") { }
-        } leadingBarItem: {
-            NVE.BackButton()                 // Back button for leading bar placement
-        } trailingBarItem: {
-            Button("Bar button") { }         // Button for trailing bar placement
+    NavigationViewElastic {
+        VStack {
+            ///...
         }
-        .refreshable(stopRefreshing: .constant(false), onRefresh: { } )    // Perform action on swipe-to-refresh gesture
-        .nveConfig { config in
-            config.barCollapsedStyle = AnyShapeStyle(.ultraThinMaterial)    // Style bar's background in collapsed form
-        }
+        .nveTitle("Title")
+        .nveTitleDisplayMode(.inline)    // Navigation bar title appears in minimized form
+    } subtitleContent: {
+        Button("Subtitle button") { }
+    } leadingBarItem: {
+        NVE.BackButton()                 // Back button for leading bar placement
+    } trailingBarItem: {
+        Button("Bar button") { }         // Button for trailing bar placement
+    }
+    .refreshable(stopRefreshing: .constant(false), onRefresh: { } )    // Perform action on swipe-to-refresh gesture
+    .nveConfig { config in
+        config.barCollapsedStyle = AnyShapeStyle(.ultraThinMaterial)    // Style bar's background in collapsed form
     }
 }
 ```
 
+#### Title Display Modes
+
+With `.nveTitleDisplayMode()`, you can control how the navigation bar's title is displayed. There are three modes available:
+
+1. **`large`**: The title is initially displayed in a large format and collapses into a smaller title as you scroll down.
+2. **`inline`**: The title always appears in its small form.
+3. **`auto`**: This is the default mode, where the title appears in `large` form in portrait orientation and switches to `inline` in landscape orientation.
+
+#### Config
+
+**NavigationViewElastic** relies on `NVE.Config` to configure various aspects, such as sizes, padding, and spacing. The `NVE.Config` is set in the 
+`SwiftUI` Environment and affects all **NavigationViewElastic** instances down the view hierarchy. You can use a convenient view extension to customize the `NVE.Config`:
+
+```swift
+.nveConfig { config in
+    config.barCollapsedStyle = AnyShapeStyle(.red)    /// Applies a red background color to the bar when collapsed
+    config.largeTitle.topEdgeInset = 10               /// Sets the top edge inset for the large title
+    config.smallTitle.topPaddingPortrait = 5          /// Sets the top padding for the small title in portrait mode
+    config.contentIgnoresSafeAreaEdges = .horizontal  /// NVE content will ignore horizontal safe area insets
+    ...
+}
+```
+
 #### Wrapping in NavigationStack
-Since `NavigationViewElastic` is a `View`, you can use it within `NavigationStack`(or within `NavigationView` for older systems) as any other view. Check out how such navigation chain might look like:
+Since `NavigationViewElastic` is a `View`, you can use it within a `NavigationStack` (or within `NavigationView` for older systems) just like any other view. Here's an example of how a navigation chain might look:
 
 <p align="center">
     <img src="https://github.com/user-attachments/assets/06732307-0bc4-4ec1-b128-c1bf537b4db9" width="250">
 </p>
 
-As you can see, first and fourth screens displaying vanilla navigation titles, while second and third screens is displaying customized `NavigationViewElastic` titles. To achieve such smooth behaviour, you have to hide system's navigation bar for any **NVE** screen within navigation sequence by adding to it code:
+In this example, the first and fourth screens display standard navigation titles, while the second and third screens showcase customized `NavigationViewElastic` titles. To achieve this smooth transition behavior, make sure to hide the system navigation bar on any **NVE** screen within the navigation sequence by adding the following code:
 
 ```
 NavigationViewElastic {
@@ -79,8 +98,7 @@ NavigationViewElastic {
 }
 .toolbar(.hidden, for: .navigationBar)
 ```
-
-Also, if you want *swipe-back* gesture to work on **NVE** screens, you need to implement this extension within your project (thanks to [this guy](https://stackoverflow.com/a/68650943)):
+Additionally, if you want the *swipe-back* gesture to work on **NVE** screens, you need to implement this extension in your project (credit to [this answer](https://stackoverflow.com/a/68650943)):
 
 ```
 extension UINavigationController {
