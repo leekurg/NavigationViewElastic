@@ -160,6 +160,8 @@ private extension NavigationBarView {
             }
         }
         .frame(maxWidth: .infinity)
+        .frame(height: config.smallTitle.supposedHeight)
+        .clipped()
         .backgroundSizeReader(size: $smallTitleSize)
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }

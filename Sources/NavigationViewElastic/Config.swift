@@ -108,6 +108,8 @@ public extension NVE.Config {
     }
     
     struct SmallTitle {
+        /// Approximated small title text height.
+        public let supposedHeight: CGFloat
         /// Padding from top edge of small title block to title text itself in portrait orientation.
         public var topPaddingPortrait: CGFloat
         /// Padding from top edge of small title block to title text itself in portrait orientation.
@@ -116,10 +118,12 @@ public extension NVE.Config {
         public var bottomPadding: CGFloat
         
         public init(
+            supposedHeight: CGFloat = 30,
             topPaddingPortrait: CGFloat = 0,
             topPaddingLandscape: CGFloat = 7,
             bottomPadding: CGFloat = 10
         ) {
+            self.supposedHeight = supposedHeight
             self.topPaddingPortrait = topPaddingPortrait
             self.topPaddingLandscape = topPaddingLandscape
             self.bottomPadding = bottomPadding
