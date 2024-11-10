@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NavigationBarView<S: View, L: View, T: View>: View {
+struct NavigationBarView: View {
     let title: String?
     let titleDisplayMode: NVE.TitleDisplayMode
     let orientation: UIInterfaceOrientation
@@ -17,9 +17,8 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     let isRefreshable: Bool
     let isRefreshing: Bool
     let largeTitleLayerSize: Binding<CGSize>
-    @ViewBuilder let subtitleContent: () -> S
-    @ViewBuilder let leadingBarItem: () -> L
-    @ViewBuilder let trailingBarItem: () -> T
+    let subtitleContent: AnyView?
+    let toolbar: Toolbar?
 
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
@@ -106,8 +105,10 @@ private extension NavigationBarView {
                         )
                     )
                 
-                subtitleContent()
-                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
+                VStack(spacing: 0) {
+                    subtitleContent
+                }
+                .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
@@ -148,19 +149,21 @@ private extension NavigationBarView {
             }
 
             HStack {
-                leadingBarItem()
+                toolbar?.leading?.content
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .leading)
                     .clipped()
 
                 Spacer()
 
-                trailingBarItem()
+                toolbar?.trailing?.content
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .trailing)
                     .clipped()
             }
         }
         .frame(maxWidth: .infinity)
+        .frame(height: 30)  //TODO!
         .backgroundSizeReader(size: $smallTitleSize)
+        .clipped()
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }

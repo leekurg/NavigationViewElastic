@@ -50,3 +50,43 @@ struct TitleDisplayModeKey: PreferenceKey {
         value = nextValue()
     }
 }
+
+// MARK: - Toolbar
+public extension View {
+    func nveToolbar(
+        @ToolbarBuilder toolbar: @escaping () -> Toolbar
+    ) -> some View {
+        preference(
+            key: ToolbarKey.self,
+            value: toolbar()
+        )
+    }
+}
+
+struct ToolbarKey: PreferenceKey {
+    static var defaultValue: Toolbar?
+    
+    static func reduce(value: inout Toolbar?, nextValue: () -> Toolbar?) {
+        value = nextValue() ?? value
+    }
+}
+
+// MARK: - Subtitle content
+public extension View {
+    func nveSubtitle<Content: View>(
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        preference(
+            key: ToolbarSubtitleKey.self,
+            value: AnyViewBox(content: content)
+        )
+    }
+}
+
+struct ToolbarSubtitleKey: PreferenceKey {
+    static var defaultValue: AnyViewBox?
+    
+    static func reduce(value: inout AnyViewBox?, nextValue: () -> AnyViewBox?) {
+        value = nextValue() ?? value
+    }
+}

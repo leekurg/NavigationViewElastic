@@ -30,37 +30,30 @@ struct ProxyView: View {
                 }
                 .nveTitle("Title")
                 .padding(.horizontal, 10)
-            },
-            subtitleContent: {
-                if isSubtitle {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 5) {
-                            ForEach(Product.allCases, id: \.self) { entry in
-                                Button(action: { stopRefreshing = true }) {
-                                    Text(entry.rawValue)
-                                        .padding(.vertical, 5)
-                                        .padding(.horizontal, 10)
-                                        .background(Color.gray.opacity(0.1))
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 10)
-                    }
-                    .padding(.vertical, 5)
-                }
-            },
-            leadingBarItem: { NVE.BackButton() },
-            trailingBarItem: {
-                Button {
-                    withAnimation(.spring) {
-                        isSubtitle.toggle()
-                    }
-                } label: {
-                    Image(systemName: "heart")
-                        .font(.system(size: 20, weight: .bold))
-                        .padding(.trailing, 10)
-                }
+//                .nveSubtitle {
+//                    if isSubtitle {
+//                        ScrollView(.horizontal, showsIndicators: false) {
+//                            HStack(spacing: 5) {
+//                                ForEach(Product.allCases, id: \.self) { entry in
+//                                    Button(action: { stopRefreshing = true }) {
+//                                        Text(entry.rawValue)
+//                                            .padding(.vertical, 5)
+//                                            .padding(.horizontal, 10)
+//                                            .background(Color.gray.opacity(0.1))
+//                                            .cornerRadius(8)
+//                                    }
+//                                }
+//                            }
+//                            .padding(.horizontal, 10)
+//                        }
+//                        .padding(.vertical, 5)
+//                    }
+//                }
+//                .nveToolbar {
+//                    Toolbar.Item(placement: .leading) {
+//                        NVE.BackButton()
+//                    }
+//                }
             }
         )
         .refreshable(stopRefreshing: $stopRefreshing, onRefresh: {})
