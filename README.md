@@ -1,9 +1,22 @@
 # NavigationViewElastic
 Mimic of `NavigationView` + `ScrollView`, with ability to add any content under title of top bar. Support for **iOS v15 and higher**
 
-<p align="center">
-    <img src="https://github.com/leekurg/NavigationViewElastic/assets/105886145/18298e5c-9bbc-4ecd-b454-5ff2937eb845" width="300">
-</p>
+<table>
+    <tbody>
+        <tr>
+            <td> <p align="center"> <strong>Portrait</strong> </p> </td>
+            <td> <p align="center"> <strong>Landscape</strong> </p> </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="https://github.com/user-attachments/assets/70497361-57d8-461a-a497-3d917469e236" width="250">
+            </td>
+            <td>
+              <img src="https://github.com/user-attachments/assets/e2bac2e4-d187-42c0-94e5-871d811915a5" width="500">
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 ### Overview
 Ever struggle to put some custom `SwiftUI` view inside of bar of system `NavigationView`?
@@ -23,6 +36,12 @@ Repository includes a package with **NavigationViewElastic** for install. You ca
 `SPM` installation: in **Xcode** tap «**File → Add packages…**», paste is search field the URL of this page and press «**Add package**».
 
 ### Usage
+`NavigationViewElastic` is just a `View`, so you can use it within `NavigationStack`(or within `NavigationView` for older systems). Check out how such navigation chain might look like:
+
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/06732307-0bc4-4ec1-b128-c1bf537b4db9" width="250">
+</p>
+
 Annotate `SwiftUI` file with «**import NavigationViewElastic**». Then pass to **NavigationViewElastic** a `content` with your main content, `subtitleContent` with additional view for displaying at the bottom of navigation bar. Optionaly, you can use `leadingBarItem` and `trailingBarItem` viewbuilders or modifier-like functions: `.refreshable()` for *Pull-to-refresh* ability, `.navigationTitle()` and `blurStyle()`.
 
 For using **NVE** as nested view inside your navigation hierarchy you can optionally add a *Back button* to navigation toolbar. You can pick a system-like button `NVE.BackButton()`, style it with custom title string, action or foreground color, or make your own view. When using **NVE** as nested navigation view, remember to hide outer `NavigationView` with `.navigationBarHidden(true)`.
