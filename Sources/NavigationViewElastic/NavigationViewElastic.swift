@@ -8,30 +8,23 @@ import SwiftUI
 /// Namespace for additional components
 public enum NVE { }
 
-/// Custom view with navigation bar. Provides a scrollable container for user's content and container
-/// to present user's subtitle content.
+/// Container with navigation bar and scrollable area, mimic of system's *NavigationStack* with ability to
+/// add user's content to the bottom of the navigation bar.
 ///
-/// Created to mimic system navigation bar with ability to add custom content in the bottom of bar.
-/// Also provide *onRefresh* method suitable for UDF-like using.
+/// Provides a vertical scrollable area for user's content and a variety of customizations for navigation bar.
 ///
-/// KNOWN ISSUE: On iOS 17 when pulling for refresh, main content might be stuttering.
-/// It happens in underlying ScrollView when it's content changed to other view with different height.
-/// 
+/// - Important: On **iOS 17** when pulling for refresh, main content might be stuttering.
+/// It happens in underlying `ScrollView` when it's content changed to other view with different height.
+///
 public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
-    let backgroundStyle: AnyShapeStyle
-    let config: NavigationViewConfig
     @ViewBuilder let content: () -> C
     @ViewBuilder let subtitleContent: () -> S
     @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
-    let stopRefreshing: Binding<Bool>
-    let onRefresh: (() -> Void)?
-
-    @State private var title: String?
+    private var stopRefreshing: Binding<Bool>
+    private var onRefresh: (() -> Void)?
 
     public init(
-        backgroundStyle: AnyShapeStyle = AnyShapeStyle(.regularMaterial),
-        config: NavigationViewConfig = .init(),
         @ViewBuilder content: @escaping () -> C,
         @ViewBuilder subtitleContent: @escaping () -> S = { EmptyView() },
         @ViewBuilder leadingBarItem: @escaping () -> L = { EmptyView() },
@@ -39,8 +32,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         stopRefreshing: Binding<Bool> = .constant(false),
         onRefresh: (() -> Void)? = nil
     ) {
-        self.backgroundStyle = backgroundStyle
-        self.config = config
         self.content = content
         self.subtitleContent = subtitleContent
         self.leadingBarItem = leadingBarItem
@@ -49,14 +40,20 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         self.onRefresh = onRefresh
     }
 
+    @Environment(\.nveConfig) var config
+
+    @StateObject private var orientationDetector = OrientationDetector(
+        filter: [.portrait, .landscapeLeft, .landscapeRight]
+    )
+
+    @State private var title: String?
+    @State private var titleDisplayMode: NVE.TitleDisplayMode = .auto
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
     /// Determines that swipe down gesture is released and component is
     /// ready to next swipe. Used to prevent multiple refreshes during one swipe.
     @State private var isLockedForRefresh: Bool = false
-
-    @Environment(\.colorScheme) var colorScheme
 
     public var body: some View {
         ZStack(alignment: .top) {
@@ -65,14 +62,29 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     content()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, navigationViewSize.height + extraHeightToCover)
+                .padding(
+                    .top,
+                    navigationViewSize.height
+                    + extraHeightToCover
+                    + orientationDetector.insets.top
+                    + config.smallTitle.topPadding(
+                        for: orientationDetector.interfaceOrientation
+                    )
+                )
+                .padding(orientationDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
+                .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
                 if isLockedForRefresh && scrollOffset.y >= 0 { isLockedForRefresh = false }
 
-                if scrollOffset.isScrolledDown(config.progress.triggeringOffset) && !isLockedForRefresh {
+                let triggeringOffset = config.progress(
+                    for: orientationDetector.interfaceOrientation
+                ).triggeringOffset
+
+                if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh
+                {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     }
@@ -93,8 +105,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
             NavigationBarView(
                 title: title,
-                backgroundStyle: backgroundStyle,
-                config: config,
+                titleDisplayMode: titleDisplayMode,
+                orientation: orientationDetector.interfaceOrientation,
+                safeAreaInsets: orientationDetector.insets,
                 extraHeightToCover: extraHeightToCover,
                 scrollOffset: scrollOffset.y,
                 isRefreshable: onRefresh != nil,
@@ -105,57 +118,37 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 trailingBarItem: trailingBarItem
             )
         }
-        .ignoresSafeArea(.container, edges: .top)
+        .ignoresSafeArea(.container, edges: [.top, .horizontal])
     }
 
     var extraHeightToCover: CGFloat {
-        return title == nil
-                ? config.largeTitle.additionalTopPadding
-                : config.largeTitle.additionalTopPadding
-                    + config.largeTitle.supposedHeight
+        if title == nil { return 0 }
+
+        return switch titleDisplayMode {
+        case .auto:
+            orientationDetector.interfaceOrientation.isLandscape
+                ? 0
+                : config.largeTitle.topPadding + config.largeTitle.supposedHeight
+        case .large:
+            config.largeTitle.topPadding + config.largeTitle.supposedHeight
+        case .inline:
+            0
+        }
     }
 }
 
 // MARK: - Public API
 public extension NavigationViewElastic {
     func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
-        Self(
-            backgroundStyle: self.backgroundStyle,
-            config: self.config,
-            content: self.content,
-            subtitleContent: self.subtitleContent,
-            leadingBarItem: self.leadingBarItem,
-            trailingBarItem: self.trailingBarItem,
-            stopRefreshing: stopRefreshing,
-            onRefresh: onRefresh
-        )
-    }
-
-    func backgroundStyle(_ style: AnyShapeStyle) -> Self {
-        Self(
-            backgroundStyle: style,
-            config: self.config,
-            content: self.content,
-            subtitleContent: self.subtitleContent,
-            leadingBarItem: self.leadingBarItem,
-            trailingBarItem: self.trailingBarItem,
-            stopRefreshing: self.stopRefreshing,
-            onRefresh: self.onRefresh
-        )
+        with(self) { copy in
+            copy.stopRefreshing = stopRefreshing
+            copy.onRefresh = onRefresh
+        }
     }
 }
 
-// MARK: - Preferences
-public extension View {
-    func navigationElasticTitle(_ title: String? = nil) -> some View {
-        preference(key: TitleKey.self, value: title)
-    }
+#if DEBUG
+#Preview {
+    ProxyView()
 }
-
-private struct TitleKey: PreferenceKey {
-    static var defaultValue: String? = nil
-
-    static func reduce(value: inout String?, nextValue: () -> String?) {
-        value = value ?? nextValue()
-    }
-}
+#endif

@@ -69,9 +69,9 @@ struct PieView: View {
         self.diameter = diameter
         self.offset = offset
 
-        if startRevealOffset > revealedOffset {
+        if startRevealOffset >= revealedOffset {
             self.startRevealOffset = 30
-            self.revealedOffset = 150
+            self.revealedOffset = 100
         } else {
             self.startRevealOffset = startRevealOffset
             self.revealedOffset = revealedOffset
@@ -91,14 +91,16 @@ struct PieView: View {
             clockwise: true
            )
         }
-        .blur(radius: 5)
+        .blur(radius: 3)
         .rotationEffect(.degrees(-90))
     }
 
     private var startAngle: Angle {
         guard offset > startRevealOffset else { return .degrees(0) }
 
-        let degrees = clamp(offset * 3 - startRevealOffset * 3, min: 0, max: 360)
+        let step = 360.0 / abs(revealedOffset - startRevealOffset)
+        let degrees = clamp(offset * step - startRevealOffset * step, min: 0, max: 360)
+
         return .degrees(degrees)
     }
 }
@@ -124,6 +126,9 @@ struct ProgressIndicator_Proxy: View {
             navigationBar
         }
         .edgesIgnoringSafeArea(.top)
+        .overlay(alignment: .bottom) {
+            Text("scroll: \(String(format: "%.1f", scrollOffset.y))")
+        }
     }
 
     var navigationBar: some View {
