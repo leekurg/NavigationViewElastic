@@ -38,16 +38,16 @@
 ### Usage
 You can use example project located here: [NavigationViewElastic Example](https://github.com/leekurg/NavigationViewElasticExample).
 
-```
+```swift
 var body: some View {
     NavigationViewElastic {
         VStack {
             ///...
         }
-        .nveTitle("Title")
+        .nveTitle("Title")               // Set navigation bar title
         .nveTitleDisplayMode(.inline)    // Navigation bar title appears in minimized form
     } subtitleContent: {
-        Button("Subtitle button") { }
+        Button("Subtitle button") { }    // Subtitle content for navigation bar
     } leadingBarItem: {
         NVE.BackButton()                 // Back button for leading bar placement
     } trailingBarItem: {
@@ -92,7 +92,7 @@ Since `NavigationViewElastic` is a `View`, you can use it within a `NavigationSt
 
 In this example, the first and fourth screens display standard navigation titles, while the second and third screens showcase customized `NavigationViewElastic` titles. To achieve this smooth transition behavior, make sure to hide the system navigation bar on any **NVE** screen within the navigation sequence by adding the following code:
 
-```
+```swift
 NavigationViewElastic {
     ...
 }
@@ -100,7 +100,7 @@ NavigationViewElastic {
 ```
 Additionally, if you want the *swipe-back* gesture to work on **NVE** screens, you need to implement this extension in your project (credit to [this answer](https://stackoverflow.com/a/68650943)):
 
-```
+```swift
 extension UINavigationController {
     override open func viewDidLoad() {
         super.viewDidLoad()
