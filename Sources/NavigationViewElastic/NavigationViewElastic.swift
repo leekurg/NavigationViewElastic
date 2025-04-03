@@ -65,11 +65,11 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 .padding(
                     .top,
                     navigationViewSize.height
-                    + extraHeightToCover
-                    + orientationDetector.insets.top
-                    + config.smallTitle.topPadding(
-                        for: orientationDetector.interfaceOrientation
-                    )
+                        + extraHeightToCover
+                        + orientationDetector.insets.top
+                        + config.smallTitle.topPadding(
+                            for: orientationDetector.interfaceOrientation
+                        )
                 )
                 .padding(orientationDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
@@ -139,6 +139,13 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
 
 // MARK: - Public API
 public extension NavigationViewElastic {
+    /// Set up a corresponding ``NavigationViewElastic`` with a *refreshable* closure that will be called on *pull-to-refresh* gesture.
+    ///
+    /// - Parameters:
+    ///  - stopRefreshing - binding allows to programmatically stop refreshing process and switch
+    ///  from *refreshing* state to *idle* state.
+    ///  - onRefresh - a closure to run when  *pull-to-refresh* gesture triggered.
+    ///
     func refreshable(stopRefreshing: Binding<Bool>, onRefresh: @escaping () -> Void) -> Self {
         with(self) { copy in
             copy.stopRefreshing = stopRefreshing
@@ -156,6 +163,26 @@ public extension View {
     ///
     func onNveScrollPositionChanged(_ perform: @escaping (CGPoint) -> Void) -> some View {
         onPreferenceChange(ScrollPositionPreferenceKey.self, perform: perform)
+    }
+
+    /// Configures the corresponding ``NavigationViewElastic`` to observe title display mode changes
+    /// based on user interactions.
+    ///
+    /// The provided **perform** closure is triggered each time the title display mode changes between
+    /// ``NVE/TitleDisplayMode/large`` and ``NVE/TitleDisplayMode/inline`` due to user interactions.
+    ///
+    /// - When the mode switches to ``NVE/TitleDisplayMode/inline``, **perform** is called with *true*.
+    /// - When the mode switches to ``NVE/TitleDisplayMode/large``, **perform** is called with *false*.
+    ///
+    /// ## Note:
+    /// **perform** will not be called if any of the following conditions are met:
+    /// 1. The title display mode is explicitly set to ``NVE/TitleDisplayMode/inline`` using
+    ///    ``nveTitleDisplayMode(_:)``.
+    /// 2. The title display mode is set to ``NVE/TitleDisplayMode/auto`` via ``nveTitleDisplayMode(_:)``
+    ///    **and** the device's orientation is *landscape*.
+    ///
+    func onNveTitleDisplayModeChanged(_ perform: @escaping (Bool) -> Void) -> some View {
+        onPreferenceChange(TitleDisplayModeChangedKey.self, perform: perform)
     }
 }
 

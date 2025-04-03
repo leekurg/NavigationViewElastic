@@ -42,6 +42,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.smallTitle.topPadding(for: orientation)
                 )
         }
+        .preference(key: TitleDisplayModeChangedKey.self, value: isTitleDisplayModeChanged)
         .onAppear {
             isAppeared = true
         }
@@ -107,7 +108,7 @@ private extension NavigationBarView {
                     )
                 
                 subtitleContent()
-                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
+                    .transition(.scale(y: 0, anchor: .top).combined(with: .blur))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
@@ -234,6 +235,14 @@ private extension NavigationBarView {
         scrollFactor <= config.largeTitle.topPadding
             + safeAreaInsets.top
             + config.smallTitle.bottomPadding
+    }
+
+    var isTitleDisplayModeChanged: Bool {
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+            return isReadyToCollapse
+        } else {
+            return true
+        }
     }
 
     var barBackgroundOpacity: CGFloat {
