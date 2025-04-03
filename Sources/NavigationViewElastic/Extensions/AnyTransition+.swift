@@ -52,3 +52,37 @@ extension AnyTransition {
         )
     }
 }
+
+// MARK: - Blur
+fileprivate struct BlurTransition: ViewModifier, Animatable {
+    private var radius: Double
+
+    init(radius: Double?) {
+        self.radius = radius ?? 0
+    }
+
+    var animatableData: Double {
+        get { radius }
+        set { radius = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        content.blur(radius: radius)
+    }
+}
+
+extension AnyTransition {
+    /// Blur and change opacity of this view with default blur radius.
+    static var blur: Self {
+        blur()
+    }
+
+    /// Blur and change opacity of this view with given blur radius.
+    static func blur(radius: Double? = 20) -> Self {
+        AnyTransition.modifier(
+            active: BlurTransition(radius: radius),
+            identity: BlurTransition(radius: 0)
+        )
+        .combined(with: .opacity)
+    }
+}
