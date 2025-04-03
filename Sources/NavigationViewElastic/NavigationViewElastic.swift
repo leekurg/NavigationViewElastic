@@ -147,6 +147,18 @@ public extension NavigationViewElastic {
     }
 }
 
+public extension View {
+    /// Sets up an observation for scroll position changes within the corresponding ``NavigationViewElastic``
+    /// and triggers the provided **perform** closure whenever the value changes.
+    ///
+    /// - Important: Avoid performing heavy computations within the **perform** closure, as it will be called
+    /// frequently during fast scrolling, which could impact performance.
+    ///
+    func onNveScrollPositionChanged(_ perform: @escaping (CGPoint) -> Void) -> some View {
+        onPreferenceChange(ScrollPositionPreferenceKey.self, perform: perform)
+    }
+}
+
 #if DEBUG
 #Preview {
     ProxyView()
