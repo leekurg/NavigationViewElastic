@@ -51,10 +51,18 @@ struct TitleDisplayModeKey: PreferenceKey {
     }
 }
 
+// MARK: - Display mode changed
 struct TitleDisplayModeChangedKey: PreferenceKey {
     static var defaultValue: Bool = false
 
     static func reduce(value: inout Bool, nextValue: () -> Bool) {
         value = nextValue()
     }
+}
+
+// MARK: - Scroll rect changed
+public struct NVEScrollRectPreferenceKey: SwiftUI.PreferenceKey {
+    public static var defaultValue: CGRect { .zero }
+
+    public static func reduce(value: inout CGRect, nextValue: () -> CGRect) { }
 }
