@@ -24,8 +24,9 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
-    @State private var smallTitleSize: CGSize = .zero
+//    @State private var smallTitleSize: CGSize = .zero
     @State private var isAppeared = false
+    @State private var isTitleDisplayModeChanged: Bool = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -42,7 +43,78 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.smallTitle.topPadding(for: orientation)
                 )
         }
-        .preference(key: TitleDisplayModeChangedKey.self, value: isTitleDisplayModeChanged)
+//        .preference(key: TitleDisplayModeChangedKey.self, value: isTitleDisplayModeChanged)
+        .preference(
+            key: TitleDisplayModeChangedKey2.self,
+            value: .init(
+                appeared: isAppeared,
+                changedToInline: isTitleDisplayModeChanged
+            )
+        )
+        .onChange(of: titleDisplayMode) { mode in
+            print("bar: display mode change")
+            isTitleDisplayModeChanged = {
+                if mode == .large || (mode == .auto && !orientation.isLandscape)  {
+                    isReadyToCollapse
+                } else {
+                    true
+                }
+            }()
+        }
+        .onChange(of: orientation) { orientation in
+            print("bar: orientation change")
+            isTitleDisplayModeChanged = {
+                if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+                    isReadyToCollapse
+                } else {
+                    true
+                }
+            }()
+        }
+        .onChange(of: isReadyToCollapse) { ready in
+            print("bar: ready to collapse change [\(ready)]")
+            isTitleDisplayModeChanged = {
+                if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+                    ready
+                } else {
+                    true
+                }
+            }()
+        }
+//        .onChange(of: scrollFactor) { _ in
+//            print("bar: scroll factor change")
+//            isTitleDisplayModeChanged = {
+//                if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+//                    isReadyToCollapse
+//                } else {
+//                    true
+//                }
+//            }()
+//        }
+        
+        //    var isTitleDisplayModeChanged: Bool {
+        //        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+        ////            let res = isReadyToCollapse
+        ////            print("title mode to inline `\(res)`")
+        ////            return res
+        //
+        ////            return isAppeared
+        ////                ? isReadyToCollapse
+        ////                : titleDisplayMode == .inline
+        //
+        //            if isAppeared {
+        //                print("title mode to inline [appeared] `\(isReadyToCollapse)`")
+        //                return isReadyToCollapse
+        //            } else {
+        //                print("title mode to inline [NOT appeared]`\(isReadyToCollapse)`")
+        //                return isReadyToCollapse
+        //            }
+        //        } else {
+        //            print("B: true")
+        //            return true
+        //        }
+        //    }
+        
         .onAppear {
             isAppeared = true
         }
@@ -237,13 +309,74 @@ private extension NavigationBarView {
             + config.smallTitle.bottomPadding
     }
 
-    var isTitleDisplayModeChanged: Bool {
-        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
-            return isReadyToCollapse
-        } else {
-            return true
-        }
-    }
+    // v1
+//    var isTitleDisplayModeChanged: Bool {
+//        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+//            return isReadyToCollapse
+//        } else {
+//            return true
+//        }
+//    }
+    
+    //v2
+//    var isTitleDisplayModeChanged: Bool {
+//        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape) {
+//            return isAppeared
+//            ? isReadyToCollapse
+//            : titleDisplayMode == .inline
+//        } else {
+//            return true
+//        }
+//    }
+    
+    //v3
+//    var isTitleDisplayModeChanged: Bool {
+//        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+////            let res = isReadyToCollapse
+////            print("title mode to inline `\(res)`")
+////            return res
+//            
+////            return isAppeared
+////                ? isReadyToCollapse
+////                : titleDisplayMode == .inline
+//            
+//            
+//            let res: Bool
+//            if isAppeared {
+//                print("title mode to inline [appeared] `\(isReadyToCollapse)`")
+//                return isReadyToCollapse
+//            } else {
+//                print("title mode to inline [NOT appeared]`\(titleDisplayMode == .inline)`")
+//                return titleDisplayMode == .inline
+//            }
+//        } else {
+//            print("B: true")
+//            return true
+//        }
+//    }
+    
+//    var isTitleDisplayModeChanged: Bool {
+//        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+////            let res = isReadyToCollapse
+////            print("title mode to inline `\(res)`")
+////            return res
+//            
+////            return isAppeared
+////                ? isReadyToCollapse
+////                : titleDisplayMode == .inline
+//            
+//            if isAppeared {
+//                print("title mode to inline [appeared] `\(isReadyToCollapse)`")
+//                return isReadyToCollapse
+//            } else {
+//                print("title mode to inline [NOT appeared]`\(isReadyToCollapse)`")
+//                return isReadyToCollapse
+//            }
+//        } else {
+//            print("B: true")
+//            return true
+//        }
+//    }
 
     var barBackgroundOpacity: CGFloat {
         if !isIntersectionWithContent { return 0 }
@@ -256,12 +389,12 @@ private extension NavigationBarView {
     }
 }
 
-#if DEBUG
-#Preview {
-    ProxyView()
-        .nveConfig { config in
-//            config.largeTitle.topPadding = 20
-//            config.largeTitle.bottomPadding = 20
-        }
-}
-#endif
+//#if DEBUG
+//#Preview {
+//    ProxyView()
+//        .nveConfig { config in
+////            config.largeTitle.topPadding = 20
+////            config.largeTitle.bottomPadding = 20
+//        }
+//}
+//#endif

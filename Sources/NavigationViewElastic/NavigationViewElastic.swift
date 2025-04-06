@@ -132,6 +132,9 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             .onChange(of: isRefreshing) { refreshing in
                 if refreshing { onRefresh?() }
             }
+//            .onChange(of: navigationViewSize) { size in
+//                print("navViewSize: \(size)")
+//            }
 
             NavigationBarView(
                 title: title,
@@ -247,6 +250,26 @@ public extension View {
     ///
     func onNveTitleDisplayModeChanged(_ perform: @escaping (Bool) -> Void) -> some View {
         onPreferenceChange(TitleDisplayModeChangedKey.self, perform: perform)
+    }
+    
+    func onNveTitleDisplayModeChanged2(
+        _ animation: Animation? = .spring,
+        _ perform: @escaping (Bool) -> Void
+    ) -> some View {
+        onPreferenceChange(TitleDisplayModeChangedKey2.self) { value in
+//            if value.appeared {
+//                print("onNveTitleDisplayModeChanged2 - performing")
+//                withAnimation(animation) {
+//                    perform(value.changedToInline)
+//                }
+//            } else {
+//                print("onNveTitleDisplayModeChanged2 - ingonred")
+//            }
+            
+            withAnimation(value.appeared ? animation : nil) {
+                perform(value.changedToInline)
+            }
+        }
     }
 }
 

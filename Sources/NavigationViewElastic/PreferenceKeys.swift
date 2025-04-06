@@ -60,6 +60,19 @@ struct TitleDisplayModeChangedKey: PreferenceKey {
     }
 }
 
+struct TitleDisplayModeChangedKey2: PreferenceKey {
+    static var defaultValue: Value = .init(appeared: false, changedToInline: false)
+
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value = nextValue()
+    }
+    
+    struct Value: Equatable {
+        let appeared: Bool
+        let changedToInline: Bool
+    }
+}
+
 // MARK: - Scroll rect changed
 public struct NVEScrollRectPreferenceKey: SwiftUI.PreferenceKey {
     public static var defaultValue: CGRect { .zero }
