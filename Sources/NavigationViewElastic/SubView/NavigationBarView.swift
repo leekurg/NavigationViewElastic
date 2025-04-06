@@ -24,7 +24,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
-    @State private var smallTitleSize: CGSize = .zero
     @State private var isAppeared = false
 
     var body: some View {
@@ -128,7 +127,7 @@ private extension NavigationBarView {
                 Rectangle()
                     .frame(
                         height: safeAreaInsets.top
-                            + smallTitleSize.height
+                            + config.smallTitle.supposedHeight
                             + config.largeTitle.topEdgeInset
                             + config.smallTitle.bottomPadding
                             + config.smallTitle.topPadding(for: orientation)
@@ -163,7 +162,6 @@ private extension NavigationBarView {
         .frame(maxWidth: .infinity)
         .frame(height: config.smallTitle.supposedHeight)
         .clipped()
-        .backgroundSizeReader(size: $smallTitleSize)
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
