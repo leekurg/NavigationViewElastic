@@ -9,8 +9,9 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
-    let backgroundStyle: AnyShapeStyle
-    let config: NavigationViewConfig
+    let titleDisplayMode: NVE.TitleDisplayMode
+    let orientation: UIInterfaceOrientation
+    let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
     let scrollOffset: CGFloat
     let isRefreshable: Bool
@@ -20,17 +21,42 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @ViewBuilder let leadingBarItem: () -> L
     @ViewBuilder let trailingBarItem: () -> T
 
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.nveConfig) var config
+    @Environment(\.nveConfig.barCollapsedStyle) var barStyle
+
+    @State private var smallTitleSize: CGSize = .zero
+    @State private var isAppeared = false
 
     var body: some View {
         ZStack(alignment: .top) {
             largeTitleLayer
 
             smallTitleLayer
+                .padding(safeAreaInsets.ignoring(.bottom))
 
             progressView
-                .padding(.top, config.largeTitle.topEdgeInset + 10)
+                .padding(
+                    .top,
+                    safeAreaInsets.top
+                    + config.largeTitle.topEdgeInset
+                    + config.smallTitle.topPadding(for: orientation)
+                )
         }
+        .onAppear {
+            isAppeared = true
+        }
+//        .overlay(alignment: .bottom) {
+//            VStack {
+//                HStack {
+//                    Text("scroll: \(scrollOffset, specifier: "%.1f")")
+//                    Text("factor: \(scrollFactor, specifier: "%.1f")")
+//                }
+//                Text("isReadyToCollapse: \(isReadyToCollapse)")
+//                Text("isIntersectionWithContent: \(isIntersectionWithContent)")
+//            }
+//            .padding()
+//            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+//        }
     }
 }
 
@@ -43,8 +69,8 @@ private extension NavigationBarView {
                 ProgressIndicator(
                     offset: scrollOffset,
                     isAnimating: isRefreshing,
-                    startRevealOffset: config.progress.startRevealOffset,
-                    revealedOffset: config.progress.revealedOffset,
+                    startRevealOffset: config.progress(for: orientation).startRevealOffset,
+                    revealedOffset: config.progress(for: orientation).revealedOffset,
                     isShowingLocked: isRefreshing
                 )
                 .scaleEffect(0.8)
@@ -64,38 +90,47 @@ private extension NavigationBarView {
     // MARK: - large title
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
-            Text(title ?? " ")
-                .lineLimit(1)
-                .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
-                .scaleEffect(largeTitleScale, anchor: .bottomLeading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .opacity(largeTitleOpacity)
-                .padding(
-                    .init(
-                        top: config.largeTitle.topEdgeInset,
-                        leading: 20,
-                        bottom: config.largeTitle.bottomPadding,
-                        trailing: 10
+            Group {
+                Text(title ?? " ")
+                    .lineLimit(1)
+                    .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .opacity(largeTitleOpacity)
+                    .padding(
+                        .init(
+                            top: config.largeTitle.topEdgeInset,
+                            leading: 20,
+                            bottom: config.largeTitle.bottomPadding,
+                            trailing: 10
+                        )
                     )
-                )
-
-            subtitleContent()
-
-            if isIntersectionWithContent {
-                Divider()
+                
+                subtitleContent()
+                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
             }
+            .padding(safeAreaInsets.ignoring(.vertical))
+
+            Divider().opacity(barBackgroundOpacity)
         }
-        .backgroundSizeReader(size: largeTitleLayerSize, firstValueOnly: true)
-        .background(backgroundStyle.opacity(barBackgroundOpacity))
+        .backgroundSizeReader(
+            size: largeTitleLayerSize.animation(
+                isAppeared ? config.subtitleSizeChangeAnimation : nil
+            )
+        )
+        .padding(.top, config.smallTitle.topPadding(for: orientation))
+        .background(barStyle.opacity(barBackgroundOpacity))
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
         .reverseMask(alignment: .top) {
-            if !isIntersectionWithContent {
+            if !isReadyToCollapse {
                 Rectangle()
                     .frame(
-                        height: config.largeTitle.topEdgeInset +
-                            config.largeTitle.supposedHeight +
-                            config.largeTitle.bottomPadding
+                        height: safeAreaInsets.top
+                            + smallTitleSize.height
+                            + config.largeTitle.topEdgeInset
+                            + config.smallTitle.bottomPadding
+                            + config.smallTitle.topPadding(for: orientation)
                     )
             }
         }
@@ -125,28 +160,40 @@ private extension NavigationBarView {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.bottom, 7)
-        .frame(
-            height: config.largeTitle.topEdgeInset +
-            config.largeTitle.supposedHeight +
-            config.largeTitle.bottomPadding,
-            alignment: .bottom
-        )
+        .frame(height: config.smallTitle.supposedHeight)
+        .clipped()
+        .backgroundSizeReader(size: $smallTitleSize)
+        .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
 
 // MARK: - Computed props
 private extension NavigationBarView {
     var smallTitleOpacity: CGFloat {
-        isReadyToCollapse ? 1 : 0
+        if isRefreshable {
+            return isReadyToCollapse ? 1 : 0
+        }
+
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+            return isReadyToCollapse ? 1 : 0
+        }
+
+        return 1
     }
 
     var largeTitleOpacity: CGFloat {
-        isReadyToCollapse ? 0 : 1
+        switch titleDisplayMode {
+        case .auto:
+            isReadyToCollapse
+                ? 0
+                : (orientation.isLandscape ? 0 : 1)
+        case .large: isReadyToCollapse ? 0 : 1
+        case .inline: 0
+        }
     }
 
     var largeTitleBackground: AnyShapeStyle {
-        isIntersectionWithContent ? backgroundStyle : AnyShapeStyle(.clear)
+        isIntersectionWithContent ? barStyle : AnyShapeStyle(.clear)
     }
 
     var largeTitleScale: CGFloat {
@@ -156,9 +203,15 @@ private extension NavigationBarView {
     }
 
     var scrollFactor: CGFloat {
-        let newValue = scrollOffset.isScrolledUp()
-            ? reduceScrollUpOffset(offsetY: scrollOffset, heightToCover: extraHeightToCover)
-            : extraHeightToCover + -scrollOffset
+        let newValue: CGFloat
+        let heightToCover = extraHeightToCover + safeAreaInsets.top
+
+        if scrollOffset.isScrolledUp() {
+            let offset = clamp(scrollOffset, min: 0, max: heightToCover)
+            newValue = clamp(heightToCover - offset, min: safeAreaInsets.top)
+        } else {
+            newValue = heightToCover - scrollOffset
+        }
 
         return newValue
     }
@@ -167,35 +220,39 @@ private extension NavigationBarView {
         guard isRefreshable else { return false }
 
         if isRefreshing {
-            return !isReadyToCollapse
+            return isReadyToCollapse ? (title == nil) : true
         }
 
         return scrollOffset.isScrolledDown(1)
     }
 
     var isIntersectionWithContent: Bool {
-        scrollFactor.isZero
+        scrollFactor <= safeAreaInsets.top
     }
 
     var isReadyToCollapse: Bool {
         scrollFactor <= config.largeTitle.topPadding
+            + safeAreaInsets.top
+            + config.smallTitle.bottomPadding
     }
 
     var barBackgroundOpacity: CGFloat {
         if !isIntersectionWithContent { return 0 }
 
         return clamp(
-            abs(scrollOffset - extraHeightToCover) / config.largeTitle.backgroundOpacityThreshold,
+            abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
             min: 0,
             max: 1
         )
     }
 }
 
-// MARK: - Service func
-private extension NavigationBarView {
-    func reduceScrollUpOffset(offsetY: CGFloat, heightToCover: CGFloat) -> CGFloat {
-        let offset = clamp(offsetY, min: 0, max: heightToCover)
-        return clamp(heightToCover - offset, min: 0)
-    }
+#if DEBUG
+#Preview {
+    ProxyView()
+        .nveConfig { config in
+//            config.largeTitle.topPadding = 20
+//            config.largeTitle.bottomPadding = 20
+        }
 }
+#endif
