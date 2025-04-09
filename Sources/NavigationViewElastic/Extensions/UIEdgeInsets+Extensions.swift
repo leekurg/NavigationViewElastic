@@ -12,3 +12,7 @@ extension UIEdgeInsets {
         EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
     }
 }
+
+extension EdgeInsets {
+    static let zero = EdgeInsets()
+}

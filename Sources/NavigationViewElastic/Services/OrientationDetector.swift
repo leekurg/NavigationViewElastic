@@ -18,6 +18,7 @@ final class OrientationDetector: ObservableObject {
     @Published var interfaceOrientation: UIInterfaceOrientation = UIApplication.shared.keyWindowIntefaceOrientation
 
     private var cancellables: Set<AnyCancellable> = []
+    private var cachedInsets: EdgeInsets?
 
     /// Specify a set of orientation variants to track. By default, all orientations are tracked.
     init(filter: [UIDeviceOrientation] = []) {
@@ -38,7 +39,23 @@ final class OrientationDetector: ObservableObject {
             // Scheduled to DispatchQueue.main because RunLoop.main could be busy with scroll events
             // during scroll, and insets will not be updated until scroll events is processed (scrolling is stopped).
             .delay(for: .milliseconds(1), scheduler: DispatchQueue.main)
-            .map { _ in UIApplication.shared.keyWindowInsets() }
+            .map { [weak self] orientation in
+                if #available(iOS 17, *) {
+                    return UIApplication.shared.keyWindowInsets()
+                } else {
+                    /// In some cases(detected on SE2 iOS 16 both device and simulator,
+                    /// when using Google Mobile Ads) ``UIApplication/_keyWindow`` returns zeroed
+                    /// insets during ad presentation. This is a workaround.
+                    let newInsets = UIApplication.shared.keyWindowInsets()
+
+                    if newInsets == .zero && orientation.isPortrait {
+                        return self?.cachedInsets ?? .zero
+                    }
+
+                    self?.cachedInsets = newInsets
+                    return newInsets
+                }
+            }
             .removeDuplicates()
             .sink { [weak self] in self?.insets = $0 }
             .store(in: &cancellables)
