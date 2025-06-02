@@ -53,7 +53,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
     )
 
     @State private var title: String?
-    @State private var titleDisplayMode: NVE.TitleDisplayMode = .auto
+    @State private var titleDisplayMode: NVE.PreferredTitleDisplayMode = .auto
     @State private var navigationViewSize: CGSize = .zero
     @State private var scrollOffset = CGPoint.zero
     @State private var isRefreshing: Bool = false
@@ -67,7 +67,11 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
             let scrollTo = Binding<ScrollRelativeAnchor?>(
                 get: {
                     switch scrollToAnchor.wrappedValue {
-                    case .topInline: .top(offset: config.smallTitle.supposedHeight + 1)
+                    case .topInline: { switch titleDisplayMode {
+                        case .inline: .top(offset: 0)
+                        default: .top(offset: config.smallTitle.supposedHeight + 1)
+                        }
+                    }()
                     case .topLarge: .top(offset: 0)
                     case .bottom: .bottom(offset: 0)
                     case .none: .none
@@ -103,7 +107,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                 )
                 .padding(orientationDetector.insets.ignoring([config.contentIgnoresSafeAreaEdges, .vertical]))
 				.onPreferenceChange(TitleKey.self) { newTitle in title = newTitle }
-                .onPreferenceChange(TitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
+                .onPreferenceChange(PreferredTitleDisplayModeKey.self) { newMode in titleDisplayMode = newMode }
             }
             .onChange(of: scrollOffset) { offset in
                 guard onRefresh != nil else { return }
@@ -164,15 +168,6 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
         case .inline:
             0
         }
-    }
-}
-
-//TODO: move
-public extension NVE {
-    enum ScrollAnchor {
-        case topInline
-        case topLarge
-        case bottom
     }
 }
 
@@ -245,7 +240,7 @@ public extension View {
     /// 2. The title display mode is set to ``NVE/TitleDisplayMode/auto`` via ``nveTitleDisplayMode(_:)``
     ///    **and** the device's orientation is *landscape*.
     ///
-    func onNveTitleDisplayModeChanged(_ perform: @escaping (Bool) -> Void) -> some View {
+    func onNveTitleDisplayModeChanged(_ perform: @escaping (NVE.TitleDisplayMode) -> Void) -> some View {
         onPreferenceChange(TitleDisplayModeChangedKey.self, perform: perform)
     }
 }

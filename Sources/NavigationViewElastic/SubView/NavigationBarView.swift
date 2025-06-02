@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
-    let titleDisplayMode: NVE.TitleDisplayMode
+    let titleDisplayMode: NVE.PreferredTitleDisplayMode
     let orientation: UIInterfaceOrientation
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
@@ -41,7 +41,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.smallTitle.topPadding(for: orientation)
                 )
         }
-        .preference(key: TitleDisplayModeChangedKey.self, value: isTitleDisplayModeChanged)
+        .preference(key: TitleDisplayModeChangedKey.self, value: titleDisplayState)
         .onAppear {
             isAppeared = true
         }
@@ -234,12 +234,13 @@ private extension NavigationBarView {
             + safeAreaInsets.top
             + config.smallTitle.bottomPadding
     }
-
-    var isTitleDisplayModeChanged: Bool {
-        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
-            return isReadyToCollapse
-        } else {
-            return true
+    
+    var titleDisplayState: NVE.TitleDisplayMode {
+        switch (titleDisplayMode, orientation.isLandscape) {
+        case (.auto, true): .inline
+        case (.auto, false): isReadyToCollapse ? .inline : .large
+        case (.large, _): isReadyToCollapse ? .inline : .large
+        case (.inline, _): .inline
         }
     }
 

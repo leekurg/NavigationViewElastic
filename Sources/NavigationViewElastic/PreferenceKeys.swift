@@ -25,7 +25,7 @@ struct TitleKey: PreferenceKey {
 
 // MARK: - Display mode
 public extension NVE {
-    enum TitleDisplayMode {
+    enum PreferredTitleDisplayMode {
         /// Title of the ``NavigationViewElastic`` in portrait orientation will be shown
         /// as a large text, and in landscape orientation as a small text.
         case auto
@@ -34,28 +34,41 @@ public extension NVE {
         /// Title of the ``NavigationViewElastic`` will be shown as a small text.
         case inline
     }
+    
+    enum TitleDisplayMode {
+        /// Title of the ``NavigationViewElastic`` is displaying as a large text.
+        case large
+        /// Title of the ``NavigationViewElastic`` is displaying as a small text.
+        case inline
+    }
+    
+    enum ScrollAnchor {
+        case topInline
+        case topLarge
+        case bottom
+    }
 }
 
 public extension View {
     /// Set the title display mode on the parent ``NavigationElasticView``.
-    func nveTitleDisplayMode(_ mode: NVE.TitleDisplayMode? = .auto) -> some View {
-        preference(key: TitleDisplayModeKey.self, value: mode ?? .auto)
+    func nveTitleDisplayMode(_ mode: NVE.PreferredTitleDisplayMode? = .auto) -> some View {
+        preference(key: PreferredTitleDisplayModeKey.self, value: mode ?? .auto)
     }
 }
 
-struct TitleDisplayModeKey: PreferenceKey {
-    static var defaultValue: NVE.TitleDisplayMode = .auto
+struct PreferredTitleDisplayModeKey: PreferenceKey {
+    static var defaultValue: NVE.PreferredTitleDisplayMode = .auto
 
-    static func reduce(value: inout NVE.TitleDisplayMode, nextValue: () -> NVE.TitleDisplayMode) {
+    static func reduce(value: inout NVE.PreferredTitleDisplayMode, nextValue: () -> NVE.PreferredTitleDisplayMode) {
         value = nextValue()
     }
 }
 
 // MARK: - Display mode changed
 struct TitleDisplayModeChangedKey: PreferenceKey {
-    static var defaultValue: Bool = false
+    static var defaultValue: NVE.TitleDisplayMode = .inline
 
-    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+    static func reduce(value: inout NVE.TitleDisplayMode, nextValue: () -> NVE.TitleDisplayMode) {
         value = nextValue()
     }
 }
