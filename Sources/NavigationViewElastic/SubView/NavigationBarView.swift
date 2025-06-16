@@ -245,13 +245,17 @@ private extension NavigationBarView {
     }
 
     var barBackgroundOpacity: CGFloat {
-        if !isIntersectionWithContent { return 0 }
-
-        return clamp(
-            abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
-            min: 0,
-            max: 1
-        )
+        if #available(iOS 26, *) {
+            return 0
+        } else {
+            if !isIntersectionWithContent { return 0 }
+            
+            return clamp(
+                abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
+                min: 0,
+                max: 1
+            )
+        }
     }
 }
 
