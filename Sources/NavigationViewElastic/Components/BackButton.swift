@@ -55,10 +55,11 @@ private extension NVE.BackButton {
         public var body: some View {
             Button(action: action) {
                 Image(systemName: layoutDirection == .leftToRight ? "chevron.left" : "chevron.right")
-                    .font(.system(size: 25, weight: .regular))
-                    .frame(width: 25, height: 35)
+                    .font(.system(size: 21, weight: .regular))
+                    .frame(width: 20, height: 30)
             }
             .buttonStyle(.glass)
+            .padding(insets)
         }
     }
     
@@ -98,7 +99,12 @@ public extension NVE.BackButton {
 
         var insets: EdgeInsets {
             switch self {
-            case .nve: .init(top: 5, leading: 8, bottom: 5, trailing: 5)
+            case .nve:
+                if #available(iOS 26, *) {
+                    .init(top: 7, leading: 15, bottom: 5, trailing: 5)
+                } else {
+                    .init(top: 5, leading: 8, bottom: 5, trailing: 5)
+                }
             case .system: .init(top: 5, leading: 0, bottom: 5, trailing: 5)
             case .manual(let insets): insets
             }

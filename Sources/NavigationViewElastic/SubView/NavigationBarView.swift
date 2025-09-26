@@ -119,7 +119,20 @@ private extension NavigationBarView {
             )
         )
         .padding(.top, config.smallTitle.topPadding(for: orientation))
-        .background(barStyle.opacity(barBackgroundOpacity))
+        .apply { view in
+            if #available(iOS 26, *) {
+                view.background(
+                    Rectangle().fill(.clear)
+                        .frame(width: UIScreen.main.bounds.width)
+                        .padding(.horizontal, 10)
+                        .glassEffect(.regular, in: Rectangle())
+                        .ignoresSafeArea()
+                        .opacity(barBackgroundOpacity)
+                )
+            } else {
+                view.background(barStyle.opacity(barBackgroundOpacity))
+            }
+        }
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
         .reverseMask(alignment: .top) {
@@ -150,18 +163,15 @@ private extension NavigationBarView {
             HStack {
                 leadingBarItem()
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .leading)
-                    .clipped()
 
                 Spacer()
 
                 trailingBarItem()
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .trailing)
-                    .clipped()
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: config.smallTitle.supposedHeight)
-        .clipped()
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
@@ -189,10 +199,6 @@ private extension NavigationBarView {
         case .large: isReadyToCollapse ? 0 : 1
         case .inline: 0
         }
-    }
-
-    var largeTitleBackground: AnyShapeStyle {
-        isIntersectionWithContent ? barStyle : AnyShapeStyle(.clear)
     }
 
     var largeTitleScale: CGFloat {
@@ -245,17 +251,13 @@ private extension NavigationBarView {
     }
 
     var barBackgroundOpacity: CGFloat {
-        if #available(iOS 26, *) {
-            return 0
-        } else {
-            if !isIntersectionWithContent { return 0 }
-            
-            return clamp(
-                abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
-                min: 0,
-                max: 1
-            )
-        }
+        if !isIntersectionWithContent { return 0 }
+        
+        return clamp(
+            abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
+            min: 0,
+            max: 1
+        )
     }
 }
 
