@@ -91,20 +91,36 @@ private extension NavigationBarView {
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
-                Text(title ?? " ")
-                    .lineLimit(1)
-                    .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
-                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(largeTitleOpacity)
-                    .padding(
-                        .init(
-                            top: config.largeTitle.topEdgeInset,
-                            leading: 20,
-                            bottom: config.largeTitle.bottomPadding,
-                            trailing: 10
-                        )
+                VStack {
+                    if largeTitleOpacity > 0, let title {
+                        Text(title)
+                            .scaleEffect(largeTitleScale, anchor: .bottomLeading)
+                            .opacity(largeTitleOpacity)
+                            .applyIfiOS26 { view in
+                                view
+                                    .blur(radius: largeTitleBlur)
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .opacity.animation(.linear(duration: 0.2)),
+                                            removal: .identity
+                                        )
+                                    )
+                            }
+                    } else {
+                        Text(" ").hidden()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
+                .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                .padding(
+                    .init(
+                        top: config.largeTitle.topEdgeInset,
+                        leading: 20,
+                        bottom: config.largeTitle.bottomPadding,
+                        trailing: 10
                     )
+                )
                 
                 subtitleContent()
                     .transition(.scale(y: 0, anchor: .top).combined(with: .blur))
@@ -135,16 +151,18 @@ private extension NavigationBarView {
         }
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
-        .reverseMask(alignment: .top) {
-            if !isReadyToCollapse {
-                Rectangle()
-                    .frame(
-                        height: safeAreaInsets.top
-                            + config.smallTitle.supposedHeight
-                            + config.largeTitle.topEdgeInset
-                            + config.smallTitle.bottomPadding
-                            + config.smallTitle.topPadding(for: orientation)
-                    )
+        .applyIfNotiOS26 { view in
+            view.reverseMask(alignment: .top) {
+                if !isReadyToCollapse {
+                    Rectangle()
+                        .frame(
+                            height: safeAreaInsets.top
+                                + config.smallTitle.supposedHeight
+                                + config.largeTitle.topEdgeInset
+                                + config.smallTitle.bottomPadding
+                                + config.smallTitle.topPadding(for: orientation)
+                        )
+                }
             }
         }
     }
@@ -205,6 +223,20 @@ private extension NavigationBarView {
         guard !isRefreshable else { return 1.0 }
 
         return scrollOffset.isScrolledUp() ? 1.0 : clamp((-scrollOffset + 1000) / 1000.0, min: 1.0, max: 1.2 )
+    }
+    
+    var largeTitleBlur: CGFloat {
+        guard scrollOffset.isScrolledUp() else {
+            return 0.0
+        }
+        
+        let threshold = config.largeTitle.topPadding
+            + safeAreaInsets.top
+            + config.smallTitle.bottomPadding
+        
+        let progress = min(max(scrollOffset / threshold, 0), 1)
+        
+        return 15 * (exp(progress) - 1) / (exp(1) - 1) // normalized exp
     }
 
     var scrollFactor: CGFloat {
