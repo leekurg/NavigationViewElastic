@@ -104,7 +104,18 @@ public extension NVE.Config {
             self.bottomPadding = bottomPadding
         }
 
-        public static let `default` = Self()
+        public static let `default`: Self = {
+            if #available(iOS 26, *) {
+                // Inline title presentation + no subtitle case causing
+                // Back button goes to close to bar's bottom edge.
+                // Also, due to Big Back button there is too small spacing
+                // between small title and subtitle.
+                // This padding set to prevent those issues.
+                Self(bottomPadding: 5)
+            } else {
+                Self()
+            }
+        }()
     }
     
     struct SmallTitle {

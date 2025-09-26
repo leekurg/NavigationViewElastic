@@ -90,7 +90,7 @@ private extension NavigationBarView {
     // MARK: - large title
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
-            Group {
+            VStack(spacing: 0) {
                 Text(title ?? " ")
                     .lineLimit(1)
                     .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
