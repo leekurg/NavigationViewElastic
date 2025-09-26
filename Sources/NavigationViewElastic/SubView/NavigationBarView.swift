@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
-    let titleDisplayMode: NVE.TitleDisplayMode
+    let titleDisplayMode: NVE.PreferredTitleDisplayMode
     let orientation: UIInterfaceOrientation
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
@@ -24,7 +24,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
-    @State private var smallTitleSize: CGSize = .zero
     @State private var isAppeared = false
 
     var body: some View {
@@ -42,6 +41,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.smallTitle.topPadding(for: orientation)
                 )
         }
+        .preference(key: TitleDisplayModeChangedKey.self, value: titleDisplayState)
         .onAppear {
             isAppeared = true
         }
@@ -107,7 +107,7 @@ private extension NavigationBarView {
                     )
                 
                 subtitleContent()
-                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
+                    .transition(.scale(y: 0, anchor: .top).combined(with: .blur))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
@@ -127,7 +127,7 @@ private extension NavigationBarView {
                 Rectangle()
                     .frame(
                         height: safeAreaInsets.top
-                            + smallTitleSize.height
+                            + config.smallTitle.supposedHeight
                             + config.largeTitle.topEdgeInset
                             + config.smallTitle.bottomPadding
                             + config.smallTitle.topPadding(for: orientation)
@@ -162,7 +162,6 @@ private extension NavigationBarView {
         .frame(maxWidth: .infinity)
         .frame(height: config.smallTitle.supposedHeight)
         .clipped()
-        .backgroundSizeReader(size: $smallTitleSize)
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
@@ -234,6 +233,15 @@ private extension NavigationBarView {
         scrollFactor <= config.largeTitle.topPadding
             + safeAreaInsets.top
             + config.smallTitle.bottomPadding
+    }
+    
+    var titleDisplayState: NVE.TitleDisplayMode {
+        switch (titleDisplayMode, orientation.isLandscape) {
+        case (.auto, true): .inline
+        case (.auto, false): isReadyToCollapse ? .inline : .large
+        case (.large, _): isReadyToCollapse ? .inline : .large
+        case (.inline, _): .inline
+        }
     }
 
     var barBackgroundOpacity: CGFloat {
