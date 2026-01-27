@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NavigationBarView<S: View, L: View, T: View>: View {
     let title: String?
-    let titleDisplayMode: NVE.TitleDisplayMode
+    let titleDisplayMode: NVE.PreferredTitleDisplayMode
     let orientation: UIInterfaceOrientation
     let safeAreaInsets: EdgeInsets
     let extraHeightToCover: CGFloat
@@ -24,7 +24,6 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
     @Environment(\.nveConfig) var config
     @Environment(\.nveConfig.barCollapsedStyle) var barStyle
 
-    @State private var smallTitleSize: CGSize = .zero
     @State private var isAppeared = false
 
     var body: some View {
@@ -42,6 +41,7 @@ struct NavigationBarView<S: View, L: View, T: View>: View {
                     + config.smallTitle.topPadding(for: orientation)
                 )
         }
+        .preference(key: TitleDisplayModeChangedKey.self, value: titleDisplayState)
         .onAppear {
             isAppeared = true
         }
@@ -90,24 +90,41 @@ private extension NavigationBarView {
     // MARK: - large title
     var largeTitleLayer: some View {
         VStack(spacing: 0) {
-            Group {
-                Text(title ?? " ")
-                    .lineLimit(1)
-                    .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
-                    .scaleEffect(largeTitleScale, anchor: .bottomLeading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(largeTitleOpacity)
-                    .padding(
-                        .init(
-                            top: config.largeTitle.topEdgeInset,
-                            leading: 20,
-                            bottom: config.largeTitle.bottomPadding,
-                            trailing: 10
-                        )
+            VStack(spacing: 0) {
+                VStack {
+                    if largeTitleOpacity > 0, let title {
+                        Text(title)
+                            .scaleEffect(largeTitleScale, anchor: .bottomLeading)
+                            .opacity(largeTitleOpacity)
+                            .applyIfiOS26 { view in
+                                view
+                                    .blur(radius: largeTitleBlur)
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .opacity.animation(.linear(duration: 0.2)),
+                                            removal: .identity
+                                        )
+                                    )
+                            }
+                    } else {
+                        Text(" ").hidden()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
+                .font(.system(size: 32, weight: .bold)) //Do not change, a lot of depends on text size!
+                .padding(
+                    .init(
+                        top: config.largeTitle.topEdgeInset,
+                        leading: 20,
+                        bottom: config.largeTitle.bottomPadding,
+                        trailing: 10
                     )
+                )
                 
                 subtitleContent()
-                    .transition(.scale(y: 0, anchor: .top).combined(with: .opacity))
+                    .applyIfiOS26 { $0.padding(.top, 5) }
+                    .transition(.scale(y: 0, anchor: .top).combined(with: .blur))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
 
@@ -119,19 +136,34 @@ private extension NavigationBarView {
             )
         )
         .padding(.top, config.smallTitle.topPadding(for: orientation))
-        .background(barStyle.opacity(barBackgroundOpacity))
+        .apply { view in
+            if #available(iOS 26, *) {
+                view.background(
+                    Rectangle().fill(.clear)
+                        .frame(width: UIScreen.main.bounds.width)
+                        .padding(.horizontal, 10)
+                        .glassEffect(.regular, in: Rectangle())
+                        .ignoresSafeArea()
+                        .opacity(barBackgroundOpacity)
+                )
+            } else {
+                view.background(barStyle.opacity(barBackgroundOpacity))
+            }
+        }
         .offset(y: scrollFactor)
         .frame(maxHeight: .infinity, alignment: .top)
-        .reverseMask(alignment: .top) {
-            if !isReadyToCollapse {
-                Rectangle()
-                    .frame(
-                        height: safeAreaInsets.top
-                            + smallTitleSize.height
-                            + config.largeTitle.topEdgeInset
-                            + config.smallTitle.bottomPadding
-                            + config.smallTitle.topPadding(for: orientation)
-                    )
+        .applyIfNotiOS26 { view in
+            view.reverseMask(alignment: .top) {
+                if !isReadyToCollapse {
+                    Rectangle()
+                        .frame(
+                            height: safeAreaInsets.top
+                                + config.smallTitle.supposedHeight
+                                + config.largeTitle.topEdgeInset
+                                + config.smallTitle.bottomPadding
+                                + config.smallTitle.topPadding(for: orientation)
+                        )
+                }
             }
         }
     }
@@ -150,19 +182,15 @@ private extension NavigationBarView {
             HStack {
                 leadingBarItem()
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .leading)
-                    .clipped()
 
                 Spacer()
 
                 trailingBarItem()
                     .frame(maxWidth: UIScreen.width * 0.25, maxHeight: 30, alignment: .trailing)
-                    .clipped()
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: config.smallTitle.supposedHeight)
-        .clipped()
-        .backgroundSizeReader(size: $smallTitleSize)
         .padding(.top, config.smallTitle.topPadding(for: orientation))
     }
 }
@@ -174,7 +202,7 @@ private extension NavigationBarView {
             return isReadyToCollapse ? 1 : 0
         }
 
-        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape) {
             return isReadyToCollapse ? 1 : 0
         }
 
@@ -192,14 +220,28 @@ private extension NavigationBarView {
         }
     }
 
-    var largeTitleBackground: AnyShapeStyle {
-        isIntersectionWithContent ? barStyle : AnyShapeStyle(.clear)
-    }
-
     var largeTitleScale: CGFloat {
         guard !isRefreshable else { return 1.0 }
 
         return scrollOffset.isScrolledUp() ? 1.0 : clamp((-scrollOffset + 1000) / 1000.0, min: 1.0, max: 1.2 )
+    }
+    
+    var largeTitleBlur: CGFloat {
+        if #unavailable(iOS 26) {
+            return 0
+        }
+        
+        guard scrollOffset.isScrolledUp() else {
+            return 0.0
+        }
+        
+        let threshold = config.largeTitle.topPadding
+            + safeAreaInsets.top
+            + config.smallTitle.bottomPadding
+        
+        let progress = min(max(scrollOffset / threshold, 0), 1)
+        
+        return 15 * (exp(progress) - 1) / (exp(1) - 1) // normalized exp
     }
 
     var scrollFactor: CGFloat {
@@ -235,10 +277,19 @@ private extension NavigationBarView {
             + safeAreaInsets.top
             + config.smallTitle.bottomPadding
     }
+    
+    var titleDisplayState: NVE.TitleDisplayMode {
+        switch (titleDisplayMode, orientation.isLandscape) {
+        case (.auto, true): .inline
+        case (.auto, false): isReadyToCollapse ? .inline : .large
+        case (.large, _): isReadyToCollapse ? .inline : .large
+        case (.inline, _): .inline
+        }
+    }
 
     var barBackgroundOpacity: CGFloat {
         if !isIntersectionWithContent { return 0 }
-
+        
         return clamp(
             abs(scrollOffset - extraHeightToCover) / config.barOpacityThreshold,
             min: 0,

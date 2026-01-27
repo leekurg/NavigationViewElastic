@@ -53,4 +53,3 @@ extension EnvironmentValues {
 struct NVEConfigKey: EnvironmentKey {
     static let defaultValue: NVE.Config = .default
 }
-
