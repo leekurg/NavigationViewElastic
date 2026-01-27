@@ -117,8 +117,7 @@ public struct NavigationViewElastic<C: View, S: View, L: View, T: View>: View {
                     for: orientationDetector.interfaceOrientation
                 ).triggeringOffset
 
-                if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh
-                {
+                if scrollOffset.isScrolledDown(triggeringOffset) && !isLockedForRefresh {
                     if !isRefreshing {
                         UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     }

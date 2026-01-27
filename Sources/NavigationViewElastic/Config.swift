@@ -29,7 +29,9 @@ public extension NVE {
         /// This animation applied to the internal ``ScrollView`` when **subtitleContent**
         /// size is changing.
         public var subtitleSizeChangeAnimation: Animation?
-
+        /// Parameters for BackButton appearance
+        public var backButton: NVE.Config.BackButton
+        
         public init(
             largeTitleConfig: LargeTitle = .default,
             smallTitleConfig: SmallTitle = .default,
@@ -38,7 +40,8 @@ public extension NVE {
             barCollapsedStyle: AnyShapeStyle = AnyShapeStyle(.bar),
             barOpacityThreshold: CGFloat = 10,
             contentIgnoresSafeAreaEdges: Edge.Set = [],
-            subtitleSizeChangeAnimation: Animation? = .spring
+            subtitleSizeChangeAnimation: Animation? = .spring,
+            backButton: NVE.Config.BackButton = .default
         ) {
             self.largeTitle = largeTitleConfig
             self.smallTitle = smallTitleConfig
@@ -48,6 +51,7 @@ public extension NVE {
             self.barOpacityThreshold = barOpacityThreshold
             self.contentIgnoresSafeAreaEdges = contentIgnoresSafeAreaEdges
             self.subtitleSizeChangeAnimation = subtitleSizeChangeAnimation
+            self.backButton = backButton
         }
 
         public static var `default` = Self()
@@ -178,5 +182,19 @@ public extension NVE.Config {
 
         public static let portrait = Self(startRevealOffset: 30, revealedOffset: 110, triggerThreshold: 15)
         public static let landscape = Self(startRevealOffset: 20, revealedOffset: 60, triggerThreshold: 5)
+    }
+    
+    struct BackButton {
+        /// Outside button's paddings
+        public var insets: NVE.BackButton.Insets
+        /// Context in which button is used
+        public var context: NVE.BackButton.Context
+        
+        public init(insets: NVE.BackButton.Insets = .nve, context: NVE.BackButton.Context = .standalone) {
+            self.insets = insets
+            self.context = context
+        }
+        
+        public static var `default`: Self { .init() }
     }
 }

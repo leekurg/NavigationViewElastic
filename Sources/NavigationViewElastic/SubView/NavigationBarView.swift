@@ -123,6 +123,7 @@ private extension NavigationBarView {
                 )
                 
                 subtitleContent()
+                    .applyIfiOS26 { $0.padding(.top, 5) }
                     .transition(.scale(y: 0, anchor: .top).combined(with: .blur))
             }
             .padding(safeAreaInsets.ignoring(.vertical))
@@ -201,7 +202,7 @@ private extension NavigationBarView {
             return isReadyToCollapse ? 1 : 0
         }
 
-        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape)  {
+        if titleDisplayMode == .large || (titleDisplayMode == .auto && !orientation.isLandscape) {
             return isReadyToCollapse ? 1 : 0
         }
 
@@ -226,6 +227,10 @@ private extension NavigationBarView {
     }
     
     var largeTitleBlur: CGFloat {
+        if #unavailable(iOS 26) {
+            return 0
+        }
+        
         guard scrollOffset.isScrolledUp() else {
             return 0.0
         }
