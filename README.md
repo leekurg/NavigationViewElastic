@@ -4,15 +4,36 @@
 <table>
     <tbody>
         <tr>
-            <td> <p align="center"> <strong>Portrait</strong> </p> </td>
-            <td> <p align="center"> <strong>Landscape</strong> </p> </td>
+            <td> <p align="center"> <strong>iOS 15</strong> </p> </td>
+            <td> <p align="center"> <strong>iOS 26</strong> </p> </td>
         </tr>
         <tr>
             <td>
               <img src="https://github.com/user-attachments/assets/70497361-57d8-461a-a497-3d917469e236" width="250">
             </td>
             <td>
-              <img src="https://github.com/user-attachments/assets/e2bac2e4-d187-42c0-94e5-871d811915a5" width="500">
+              <img src="https://github.com/user-attachments/assets/41d549a3-1d6c-465e-a37d-d368254cd331" width="250">
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <tbody>
+        <tr>
+            <td> <p align="center"> <strong>iOS 15</strong> </p> </td>
+        </tr>
+        <tr>
+             <td>
+              <img src="https://github.com/user-attachments/assets/e2bac2e4-d187-42c0-94e5-871d811915a5" width="530">
+            </td>
+        </tr>
+        <tr>
+            <td> <p align="center"> <strong>iOS 26</strong> </p> </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="https://github.com/user-attachments/assets/60500b7b-7d78-49fe-835b-0d96644b1c73" width="530">
             </td>
         </tr>
     </tbody>
@@ -23,16 +44,17 @@
 
 ### Features
 1. **Transparent Navigation Bar**: Mimics the behavior of the system navigation bar.
-2. **Custom Background Styles**: Apply any background style to the navigation bar.
-3. **Interactive, Resizable Content**: Add custom content at the bottom of the navigation bar.
-4. **Custom Toolbar Items**: Easily add leading or trailing toolbar items.
-5. **Title Display Control**: Adjust the navigation bar title's display mode (`large`, `inline`, or `auto`).
-6. **Editable Configurationl**: Configure sizes, padding, and spacing using a simple `NVE.Config` API.
-7. **Integration with Vanilla Navigation** Smooth integration with emdedded `NavigationStack`/`NavigationView`
-8. **Color Scheme Support**: Automatically adapts to the device's light or dark mode.
-9. **Orientation Support**: Works seamlessly in both portrait and landscape orientations.
-10. **Safe Area Configuration**: Customize the safe areas for **NavigationViewElastic** content. Bar items respects device's safe area.
-11. **Optional Back Button**: Include a `NVE.BackButton` when **NavigationViewElastic** is nested in a navigation hierarchy.
+2. **Automatic adoption to system dysign language**: Adapts to ``iOS 26`` Liquid Glass design if available.
+3. **Custom Background Styles**: Apply any background style to the navigation bar.
+4. **Interactive, Resizable Content**: Add custom content at the bottom of the navigation bar.
+5. **Custom Toolbar Items**: Easily add leading or trailing toolbar items.
+6. **Title Display Control**: Adjust the navigation bar title's display mode (`large`, `inline`, or `auto`).
+7. **Editable Configurationl**: Configure sizes, padding, and spacing using a simple `NVE.Config` API.
+8. **Integration with Vanilla Navigation** Smooth integration with emdedded `NavigationStack`/`NavigationView`
+9. **Color Scheme Support**: Automatically adapts to the device's light or dark mode.
+10. **Orientation Support**: Works seamlessly in both portrait and landscape orientations.
+11. **Safe Area Configuration**: Customize the safe areas for **NavigationViewElastic** content. Bar items respects device's safe area.
+12. **Optional Back Button**: Include a `NVE.BackButton` when **NavigationViewElastic** is nested in a navigation hierarchy.
 13. **Pull-to-Refresh API**: Implement pull-to-refresh functionality using a closure. When the task is complete, provide a `Bool` to hide the progress indicator. If no closure is passed, the progress indicator will not be shown.
 
 ### Usage
@@ -82,6 +104,14 @@ With `.nveTitleDisplayMode()`, you can control how the navigation bar's title is
     ...
 }
 ```
+
+#### Observation and control
+`NavigationViewElastic` provides a set on observation and control methods to notify the client about changes happened and allow programmatic control for varoius aspects of using it. You can observe and process following parameters:
+- ``onNveTitleDisplayModeChanged(_:)`` - triggers on title display mode change.
+- ``onNveScrollPositionChanged(_:)`` - triggers on scroll position change.
+- ``onNveScrollRectChanged(_:)`` - triggers on scroll position change.
+
+To do both observe and programmatically control scroll position you can utilize ``scrollableToAnchor(to:)`` method. It accepts a ``Binding`` value with current ``NVE.ScrollAnchor``, changing this value will cause animated scroll to target position.
 
 #### Wrapping in NavigationStack
 Since `NavigationViewElastic` is a `View`, you can use it within a `NavigationStack` (or within `NavigationView` for older systems) just like any other view. Here's an example of how a navigation chain might look:

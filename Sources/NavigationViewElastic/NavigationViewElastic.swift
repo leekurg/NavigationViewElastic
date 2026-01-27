@@ -229,9 +229,6 @@ public extension View {
     /// The provided **perform** closure is triggered each time the title display mode changes between
     /// ``NVE/TitleDisplayMode/large`` and ``NVE/TitleDisplayMode/inline`` due to user interactions.
     ///
-    /// - When the mode switches to ``NVE/TitleDisplayMode/inline``, **perform** is called with *true*.
-    /// - When the mode switches to ``NVE/TitleDisplayMode/large``, **perform** is called with *false*.
-    ///
     /// ## Note:
     /// **perform** will not be called if any of the following conditions are met:
     /// 1. The title display mode is explicitly set to ``NVE/TitleDisplayMode/inline`` using
